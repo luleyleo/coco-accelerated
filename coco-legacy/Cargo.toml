@@ -1,0 +1,10 @@
+[package]
+name = "coco-legacy"
+version = "0.1.0"
+edition = "2021"
+
+[dev-dependencies]
+float_eq = "1.0.0"
+
+[build-dependencies]
+cc = "1.0.73"

@@ -4,8 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = ["accelerated"]
+members = ["accelerated", "coco-legacy"]
 
 [dependencies]
-coco-rs = "0.5.0"
+coco = { version = "0.5.0", package = "coco-rs" }
 accelerated = { path = "accelerated" }
+coco-legacy = { path = "coco-legacy" }
+float_eq = "1.0.0"
+
+[dev-dependencies]
+proptest = "1.0.0"
