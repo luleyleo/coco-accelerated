@@ -25,3 +25,7 @@ pub fn sphere_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Optio
 pub fn ellipsoidal_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
     run_bbob(ctx, sys::futhark_entry_ellipsoidal, x, xopt, fopt)
 }
+
+pub fn rastrigin_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
+    run_bbob(ctx, sys::futhark_entry_rastrigin, x, xopt, fopt)
+}

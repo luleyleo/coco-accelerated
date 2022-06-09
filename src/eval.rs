@@ -40,7 +40,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
     let result = match function {
         Function::Sphere => functions::sphere_bbob(ctx, x, xopt, fopt),
         Function::Ellipsoid => functions::ellipsoidal_bbob(ctx, x, xopt, fopt),
-        Function::Rastrigin => todo!(),
+        Function::Rastrigin => functions::rastrigin_bbob(ctx, x, xopt, fopt),
         Function::BuecheRastrigin => todo!(),
         Function::LinearSlope => todo!(),
         Function::AttractiveSector => todo!(),

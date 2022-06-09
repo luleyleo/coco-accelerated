@@ -12,3 +12,9 @@ def ellipsoidal_factor (x: []f64) (i: i64): f64 =
 
 def ellipsoidal_raw (x: []f64): f64 =
     f64.sum (map (ellipsoidal_factor x) (indices x))
+
+-- f03: rastrigin
+
+def rastrigin_raw (x: []f64): f64 =
+    let D = f64.i64 (length x) in
+    10 * (D - f64.sum (map f64.cos (map (2*f64.pi*) x))) + sphere_raw(x)
