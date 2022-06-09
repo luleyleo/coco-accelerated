@@ -1,13 +1,14 @@
+use rerun_except::rerun_except;
 use std::{env, fs, path::PathBuf, process::Command};
 
 fn main() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR is undefined");
-    let source = PathBuf::from("src/futhark/raw.fut");
+    let source = PathBuf::from("src/futhark/bbob.fut");
     let target = PathBuf::from(out_dir).join("futhark");
 
     fs::create_dir_all(&target).expect("Could not create target dir.");
 
-    assert!(source.is_file(), "raw.fut does not exist");
+    assert!(source.is_file(), "bbob.fut does not exist");
 
     let futhark_status = Command::new("futhark")
         .args(&["c", "--library", "-o"])
@@ -38,4 +39,6 @@ fn main() {
         .file(target.join("raw.c"))
         .warnings(false)
         .compile("coco");
+
+    rerun_except(&[]).expect("Failed to watch files.");
 }

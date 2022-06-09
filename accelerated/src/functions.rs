@@ -1,11 +1,5 @@
 use crate::{storage::F64_1D, sys, Context};
 
-type RawFn = unsafe extern "C" fn(
-    ctx: *mut sys::futhark_context,
-    y: *mut f64,
-    x: *const sys::futhark_f64_1d,
-) -> ::std::os::raw::c_int;
-
 type BbobFn = unsafe extern "C" fn(
     ctx: *mut sys::futhark_context,
     y: *mut f64,
@@ -13,16 +7,6 @@ type BbobFn = unsafe extern "C" fn(
     xopt: *const sys::futhark_f64_1d,
     fopt: f64,
 ) -> ::std::os::raw::c_int;
-
-fn run_raw(ctx: &Context, function: RawFn, x: &F64_1D) -> Option<f64> {
-    let mut out = 0f64;
-    let out_ptr = &mut out as *mut f64;
-
-    let status = unsafe { (function)(ctx.inner, out_ptr, x.inner) == 0 };
-    let sync_status = ctx.sync();
-
-    (status && sync_status).then(|| out)
-}
 
 fn run_bbob(ctx: &Context, function: BbobFn, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
     let mut out = 0f64;
@@ -34,16 +18,8 @@ fn run_bbob(ctx: &Context, function: BbobFn, x: &F64_1D, xopt: &F64_1D, fopt: f6
     (status && sync_status).then(|| out)
 }
 
-pub fn sphere_raw(ctx: &Context, x: &F64_1D) -> Option<f64> {
-    run_raw(ctx, sys::futhark_entry_sphere_raw, x)
-}
-
 pub fn sphere_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
     run_bbob(ctx, sys::futhark_entry_sphere, x, xopt, fopt)
-}
-
-pub fn ellipsoidal_raw(ctx: &Context, x: &F64_1D) -> Option<f64> {
-    run_raw(ctx, sys::futhark_entry_ellipsoidal_raw, x)
 }
 
 pub fn ellipsoidal_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
