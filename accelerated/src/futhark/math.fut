@@ -1,4 +1,8 @@
 
+-- like (-) but the parameters are swapped
+def subbed (a: f64) (b: f64) = b - a
+
+-- the weird 10^(6 * (i-1/D-1))
 def pow10 (i: i64) (D: i64): f64 =
     let i = f64.i64 i in
     let D = f64.i64 D in
