@@ -2,7 +2,7 @@ use crate::{bbob::Function, Problem};
 use accelerated::functions;
 
 pub fn coco(problem: &Problem, x: &[f64]) -> f64 {
-    let mut suite = coco::Suite::new(coco::SuiteName::Bbob, "", "").unwrap();
+    let mut suite = problem.context.coco.borrow_mut();
     let mut problem = suite
         .problem_by_function_dimension_instance(
             problem.function as usize,
@@ -17,9 +17,11 @@ pub fn coco(problem: &Problem, x: &[f64]) -> f64 {
 }
 
 pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
-    let Problem { function, instance } = *problem;
+    let Problem {
+        function, instance, ..
+    } = *problem;
 
-    let ctx = &accelerated::Context::default();
+    let ctx = &problem.context.futhark;
 
     let rseed: usize = function as usize + 10000 * instance;
     let rseed_3: usize = 3 + 10000 * instance;

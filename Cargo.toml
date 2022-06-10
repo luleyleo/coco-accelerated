@@ -6,6 +6,9 @@ edition = "2021"
 [workspace]
 members = ["accelerated", "coco-legacy"]
 
+[features]
+opencl = ["accelerated/opencl"]
+
 [dependencies]
 coco = { version = "0.5.0", package = "coco-rs" }
 accelerated = { path = "accelerated" }
@@ -13,4 +16,5 @@ coco-legacy = { path = "coco-legacy" }
 float_eq = "1.0.0"
 
 [dev-dependencies]
+once_cell = "1.12.0"
 proptest = "1.0.0"

@@ -10,8 +10,14 @@ fn main() {
 
     assert!(source.is_file(), "bbob.fut does not exist");
 
+    let compiler = if cfg!(feature = "opencl") {
+        "opencl"
+    } else {
+        "c"
+    };
+
     let futhark_status = Command::new("futhark")
-        .args(&["c", "--library", "-o"])
+        .args(&[compiler, "--library", "-o"])
         .arg(target.join("raw"))
         .arg(source)
         .spawn()
@@ -39,6 +45,10 @@ fn main() {
         .file(target.join("raw.c"))
         .warnings(false)
         .compile("coco");
+
+    if cfg!(feature = "opencl") {
+        println!("cargo:rustc-link-lib=OpenCL");
+    }
 
     rerun_except(&[]).expect("Failed to watch files.");
 }
