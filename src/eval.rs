@@ -31,8 +31,15 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         _ => rseed,
     };
 
-    let xopt = coco_legacy::compute_xopt(rseed, x.len());
+    let mut xopt = coco_legacy::compute_xopt(rseed, x.len());
     let fopt = coco_legacy::compute_fopt(function as usize, instance);
+
+    // OME: This step is in the legacy C code but _not_ in the function description.
+    if function == Function::BuecheRastrigin {
+        for xi in &mut xopt {
+            *xi = xi.abs();
+        }
+    }
 
     let x = &accelerated::storage::F64_1D::new(ctx, x);
     let xopt = &accelerated::storage::F64_1D::new(ctx, &xopt);
@@ -41,7 +48,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         Function::Sphere => functions::sphere_bbob(ctx, x, xopt, fopt),
         Function::Ellipsoid => functions::ellipsoidal_bbob(ctx, x, xopt, fopt),
         Function::Rastrigin => functions::rastrigin_bbob(ctx, x, xopt, fopt),
-        Function::BuecheRastrigin => todo!(),
+        Function::BuecheRastrigin => functions::bueche_rastrigin_bbob(ctx, x, xopt, fopt),
         Function::LinearSlope => todo!(),
         Function::AttractiveSector => todo!(),
         Function::StepEllipsoid => todo!(),

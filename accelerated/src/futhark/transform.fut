@@ -1,5 +1,8 @@
 import "math"
 
+def shift (xopt: []f64) (x: []f64): []f64 =
+    map2 (-) x xopt
+
 
 local def x_osz_elem (x: f64): f64 =
     let x' = if x != 0 then f64.log(f64.abs(x)) else 0 in
@@ -20,9 +23,19 @@ local def asy_elem (b: f64) (x: []f64) (i: i64): f64 =
 def asy (b: f64) (x: []f64): []f64 =
     map (asy_elem b x) (indices x)
 
+
 local def A_elem (a: f64) (x: []f64) (i: i64): f64 =
-    a ** (0.5 * (idr i (length x)))
+    f64.sqrt(a) ** (idr i (length x))
 
 def A (a: f64) (x: []f64): []f64 =
     let factors = map (A_elem a x) (indices x) in
     map2 (*) factors x
+
+
+def pen (x: []f64): f64 =
+    x
+    |> map f64.abs
+    |> map (subbed 5)
+    |> map (f64.max 0)
+    |> map (**2)
+    |> f64.sum

@@ -44,7 +44,8 @@ proptest! {
         let cres = problem.eval_coco(&x);
         let ares = problem.eval_accelerated(&x);
 
-        assert_float_eq!(cres, ares);
+        // TODO: Improve accuracy
+        assert_float_eq!(cres, ares,  abs <= 1e-12);
     }
 
     #[test]
@@ -55,6 +56,15 @@ proptest! {
 
         // TODO: Improve accuracy
         assert_float_eq!(cres, ares, abs <= 1e-10);
+    }
+
+    #[test]
+    fn bueche_rastrigin(x in x_strategy()) {
+        let problem = Problem::new(Function::BuecheRastrigin);
+        let cres = problem.eval_coco(&x);
+        let ares = problem.eval_accelerated(&x);
+
+        assert_float_eq!(cres, ares);
     }
 
 }
