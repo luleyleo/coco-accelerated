@@ -32,3 +32,11 @@ entry bueche_rastrigin (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     |> rastrigin_raw
     |> (+ 100 * (t.pen x))
     |> (+ fopt)
+
+entry linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+    let z = map (\(xi, xopti) -> if xi * xopti < 25 then xi else xopti) (zip x xopt) in
+    let s = t.A 100 (map sign' xopt) in
+    zip s z
+    |> map (\(si, zi) -> (5 * (f64.abs si) - si * zi))
+    |> f64.sum
+    |> (+ fopt)

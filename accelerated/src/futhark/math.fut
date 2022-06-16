@@ -12,3 +12,7 @@ def sign (x: f64): f64 =
     if x == 0 then 0
     else if x > 0 then 1
     else -1
+
+def sign' (x: f64): f64 =
+    if x > 0 then 1
+    else -1

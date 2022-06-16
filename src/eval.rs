@@ -43,6 +43,12 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         }
     }
 
+    if function == Function::LinearSlope {
+        for xi in &mut xopt {
+            *xi = if *xi >= 0.0 { 5.0 } else { -5.0 };
+        }
+    }
+
     let x = &accelerated::storage::F64_1D::new(ctx, x);
     let xopt = &accelerated::storage::F64_1D::new(ctx, &xopt);
 
@@ -51,7 +57,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         Function::Ellipsoid => functions::ellipsoidal_bbob(ctx, x, xopt, fopt),
         Function::Rastrigin => functions::rastrigin_bbob(ctx, x, xopt, fopt),
         Function::BuecheRastrigin => functions::bueche_rastrigin_bbob(ctx, x, xopt, fopt),
-        Function::LinearSlope => todo!(),
+        Function::LinearSlope => functions::linear_slope_bbob(ctx, x, xopt, fopt),
         Function::AttractiveSector => todo!(),
         Function::StepEllipsoid => todo!(),
         Function::Rosenbrock => todo!(),
