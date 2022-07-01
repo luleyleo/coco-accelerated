@@ -80,6 +80,22 @@ static void bbob2009_unif(double *r, size_t N, long inseed)
 }
 
 /**
+ * @brief Converts from packed matrix storage to an array of array of double representation.
+ */
+static double **bbob2009_reshape(double **B, double *vector, const size_t m, const size_t n)
+{
+    size_t i, j;
+    for (i = 0; i < m; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            B[i][j] = vector[j * m + i];
+        }
+    }
+    return B;
+}
+
+/**
  * @brief Generates N Gaussian random numbers using the given seed and stores them in g.
  */
 static void bbob2009_gauss(double *g, const size_t N, const long seed)
@@ -96,6 +112,40 @@ static void bbob2009_gauss(double *g, const size_t N, const long seed)
             g[i] = 1e-99;
     }
     return;
+}
+
+/**
+ * @brief Computes a DIM by DIM rotation matrix based on seed and stores it in B.
+ */
+void bbob2009_compute_rotation(double **B, const long seed, const size_t DIM)
+{
+    /* To ensure temporary data fits into gvec */
+    double prod;
+    double gvect[2000];
+    size_t i, j, k; /* Loop over pairs of column vectors. */
+
+    assert(DIM * DIM < 2000);
+
+    bbob2009_gauss(gvect, DIM * DIM, seed);
+    bbob2009_reshape(B, gvect, DIM, DIM);
+    /*1st coordinate is row, 2nd is column.*/
+
+    for (i = 0; i < DIM; i++)
+    {
+        for (j = 0; j < i; j++)
+        {
+            prod = 0;
+            for (k = 0; k < DIM; k++)
+                prod += B[k][i] * B[k][j];
+            for (k = 0; k < DIM; k++)
+                B[k][i] -= prod * B[k][j];
+        }
+        prod = 0;
+        for (k = 0; k < DIM; k++)
+            prod += B[k][i] * B[k][i];
+        for (k = 0; k < DIM; k++)
+            B[k][i] /= sqrt(prod);
+    }
 }
 
 /**

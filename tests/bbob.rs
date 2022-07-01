@@ -31,6 +31,12 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::LinearSlope, |c, a| {
         assert_float_eq!(c, a);
     }),
+    (Function::AttractiveSector, |c, a| {
+        assert_float_eq!(c, a, abs <= 1e-9);
+    }),
+    (Function::EllipsoidRotated, |c, a| {
+        assert_float_eq!(c, a);
+    }),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

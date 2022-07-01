@@ -1,4 +1,7 @@
-use crate::{storage::F64_1D, sys, Context};
+use crate::{
+    storage::{F64_1D, F64_2D},
+    sys, Context,
+};
 
 type BbobFn = unsafe extern "C" fn(
     ctx: *mut sys::futhark_context,
@@ -36,4 +39,50 @@ pub fn bueche_rastrigin_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64
 
 pub fn linear_slope_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
     run_bbob(ctx, sys::futhark_entry_linear_slope, x, xopt, fopt)
+}
+
+pub fn attractive_sector_bbob(
+    ctx: &Context,
+    x: &F64_1D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+    Q: &F64_2D,
+) -> Option<f64> {
+    {
+        let function = sys::futhark_entry_attractive_sector;
+
+        let mut out = 0f64;
+        let out_ptr = &mut out as *mut f64;
+
+        let status = unsafe {
+            (function)(
+                ctx.inner, out_ptr, x.inner, xopt.inner, fopt, R.inner, Q.inner,
+            ) == 0
+        };
+        let sync_status = ctx.sync();
+
+        (status && sync_status).then(|| out)
+    }
+}
+
+pub fn ellipsoidal_rotated_bbob(
+    ctx: &Context,
+    x: &F64_1D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+) -> Option<f64> {
+    {
+        let function = sys::futhark_entry_ellipsoidal_rotated;
+
+        let mut out = 0f64;
+        let out_ptr = &mut out as *mut f64;
+
+        let status =
+            unsafe { (function)(ctx.inner, out_ptr, x.inner, xopt.inner, fopt, R.inner) == 0 };
+        let sync_status = ctx.sync();
+
+        (status && sync_status).then(|| out)
+    }
 }

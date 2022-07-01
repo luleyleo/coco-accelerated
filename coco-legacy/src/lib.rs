@@ -3,9 +3,17 @@
 //! This reuses the C legacy code to guarantee the same behaviour
 //! as the official coco benchmark suite.
 
+type CocoMatrix = *const *mut f64;
+
+pub struct Matrix {
+    pub dimension: usize,
+    pub data: Box<[f64]>,
+}
+
 extern "C" {
     fn bbob2009_compute_xopt(xopt: *mut f64, seed: i64, dim: isize);
     fn bbob2009_compute_fopt(function: isize, instance: isize) -> f64;
+    fn bbob2009_compute_rotation(matrix: CocoMatrix, seed: i64, dim: isize);
 }
 
 pub fn compute_xopt(seed: usize, dimension: usize) -> Vec<f64> {
@@ -20,6 +28,20 @@ pub fn compute_xopt(seed: usize, dimension: usize) -> Vec<f64> {
 
 pub fn compute_fopt(function: usize, instance: usize) -> f64 {
     unsafe { bbob2009_compute_fopt(function as isize, instance as isize) }
+}
+
+pub fn compute_rotation(seed: usize, dimension: usize) -> Matrix {
+    let mut data = vec![0.0; dimension * dimension].into_boxed_slice();
+
+    unsafe {
+        let coco_matrix = (0..dimension)
+            .map(|i| data.as_mut_ptr().add(i * dimension))
+            .collect::<Vec<_>>();
+
+        bbob2009_compute_rotation(coco_matrix.as_ptr(), seed as i64, dimension as isize);
+    }
+
+    Matrix { dimension, data }
 }
 
 #[cfg(test)]

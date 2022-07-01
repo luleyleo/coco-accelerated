@@ -13,6 +13,7 @@ local def x_osz_elem (x: f64): f64 =
 def x_osz (x: []f64): []f64 =
     map x_osz_elem x
 
+def y_osz (y: f64): f64 = x_osz_elem y
 
 local def asy_elem (b: f64) (x: []f64) (i: i64): f64 =
     let xi = x[i] in

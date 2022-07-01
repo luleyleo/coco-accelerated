@@ -40,3 +40,18 @@ entry linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     |> map (\(si, zi) -> (5 * (f64.abs si) - si * zi))
     |> f64.sum
     |> (+ fopt)
+
+entry attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec Q |> t.A 10 |> mat'vec R
+    |> zip xopt |> map (\(xopti, xi) -> if xi * xopti > 0 then 100 * xi else xi)
+    |> sphere_raw
+    |> t.y_osz
+    |> (** 0.9)
+    |> (+ fopt)
+
+entry ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec R |> t.x_osz
+    |> ellipsoidal_raw
+    |> (+fopt)

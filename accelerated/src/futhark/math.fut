@@ -16,3 +16,13 @@ def sign (x: f64): f64 =
 def sign' (x: f64): f64 =
     if x > 0 then 1
     else -1
+
+def mat'mat [n][m][p] (A: [n][m]f64) (B: [m][p]f64) : [n][p]f64 =
+    map (\A_row ->
+            map (\B_col ->
+                    reduce (+) 0 (map2 (*) A_row B_col))
+                (transpose B))
+        A
+
+def mat'vec [n] (M: [n][n]f64) (V: [n]f64) : [n]f64 =
+    M |> map (map2 (*) V) |> map f64.sum
