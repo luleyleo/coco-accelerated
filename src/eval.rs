@@ -28,6 +28,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
     let rseed_3: usize = 3 + 10000 * instance;
     let rseed_17: usize = 17 + 10000 * instance;
 
+    // These (as well as bent_cigar) use a different rseed.
     let rseed = match function {
         Function::BuecheRastrigin => rseed_3,
         Function::Schaffers2 => rseed_17,
@@ -37,30 +38,31 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
     let mut xopt = coco_legacy::compute_xopt(rseed, x.len());
     let fopt = coco_legacy::compute_fopt(function as usize, instance);
 
-    // OME: This step is in the legacy C code but _not_ in the function description.
-    if function == Function::BuecheRastrigin {
-        for xi in xopt.iter_mut().step_by(2) {
-            *xi = xi.abs();
+    // Special cases for some functions.
+    match function {
+        Function::BuecheRastrigin => {
+            // OME: This step is in the legacy C code but _not_ in the function description.
+            for xi in xopt.iter_mut().step_by(2) {
+                *xi = xi.abs();
+            }
         }
-    }
-
-    if function == Function::LinearSlope {
-        for xi in &mut xopt {
-            *xi = if *xi >= 0.0 { 5.0 } else { -5.0 };
+        Function::LinearSlope => {
+            for xi in &mut xopt {
+                *xi = if *xi >= 0.0 { 5.0 } else { -5.0 };
+            }
         }
-    }
-
-    // According to the documentation, xopt should be within [-3, 3],
-    // but this is not enough to satisfy that condition...
-    if function == Function::Rosenbrock {
-        for xi in &mut xopt {
-            *xi *= 0.75;
+        Function::Rosenbrock => {
+            // According to the documentation, xopt should be within [-3, 3],
+            // but this is not enough to satisfy that condition...
+            for xi in &mut xopt {
+                *xi *= 0.75;
+            }
         }
-    }
-
-    // No clue why they did this, probably it was a typo?
-    if function == Function::BentCigar {
-        xopt = coco_legacy::compute_xopt(rseed + 1000000, x.len());
+        Function::BentCigar => {
+            // No clue why they did this, probably it was a typo?
+            xopt = coco_legacy::compute_xopt(rseed + 1000000, x.len());
+        }
+        _ => {}
     }
 
     let x = &accelerated::storage::F64_1D::new(ctx, x);
