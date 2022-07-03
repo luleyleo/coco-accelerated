@@ -55,3 +55,18 @@ entry ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64
     |> t.shift xopt |> mat'vec R |> t.x_osz
     |> ellipsoidal_raw
     |> (+fopt)
+
+local def step_ellipsoidal_round (zi: f64): f64 =
+    if (f64.abs zi) > 0.5
+    then f64.floor(zi + 0.5)
+    else f64.floor(zi * 10 + 0.5) / 10
+
+entry step_ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+    let z' = x |> t.shift xopt |> mat'vec R |> t.A 10 in
+    let z = x |> t.shift xopt |> mat'vec Q |> t.A 10 |> map step_ellipsoidal_round |> mat'vec R in
+    z
+    |> step_ellipsoidal_raw
+    |> f64.max ((f64.abs z'[0]) / 10**4)
+    |> (* 0.1)
+    |> (+ fopt)
+    |> (+ t.pen x)
