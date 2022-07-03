@@ -26,7 +26,7 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
         assert_float_eq!(c, a, abs <= 1e-10);
     }),
     (Function::BuecheRastrigin, |c, a| {
-        assert_float_eq!(c, a, abs <= 50.0);
+        assert_float_eq!(c, a);
     }),
     (Function::LinearSlope, |c, a| {
         assert_float_eq!(c, a);

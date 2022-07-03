@@ -16,8 +16,7 @@ def ellipsoidal (x: []f64): f64 =
 -- f03: rastrigin
 
 def rastrigin (x: []f64): f64 =
-    let D = f64.i64 (length x) in
-    10 * (D - f64.sum (map f64.cos (map (2 * f64.pi *) x))) + sphere(x)
+    10 * ((dim x) - f64.sum (x |> map (2 * f64.pi *) |> map f64.cos)) + sphere(x)
 
 -- f07: step_ellipsoidal
 

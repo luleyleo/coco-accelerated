@@ -39,7 +39,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
     // OME: This step is in the legacy C code but _not_ in the function description.
     if function == Function::BuecheRastrigin {
-        for xi in &mut xopt {
+        for xi in xopt.iter_mut().step_by(2) {
             *xi = xi.abs();
         }
     }
