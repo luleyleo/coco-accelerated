@@ -33,3 +33,8 @@ def rosenbrock (x: []f64): f64 =
     (0 ..< (n - 1))
     |> map (\i -> 100 * (x[i]**2 - x[i+1])**2 + (x[i] - 1)**2)
     |> f64.sum
+
+-- f11: discus
+
+def discus (x: []f64): f64 =
+    (10**6) * (x[0]**2) + sphere x[1:]

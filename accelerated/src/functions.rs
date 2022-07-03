@@ -127,3 +127,18 @@ pub fn ellipsoidal_rotated_bbob(
         (status && sync_status).then(|| out)
     }
 }
+
+pub fn discus_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64, R: &F64_2D) -> Option<f64> {
+    {
+        let function = sys::futhark_entry_discus;
+
+        let mut out = 0f64;
+        let out_ptr = &mut out as *mut f64;
+
+        let status =
+            unsafe { (function)(ctx.inner, out_ptr, x.inner, xopt.inner, fopt, R.inner) == 0 };
+        let sync_status = ctx.sync();
+
+        (status && sync_status).then(|| out)
+    }
+}

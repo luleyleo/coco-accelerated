@@ -96,7 +96,12 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::ellipsoidal_rotated_bbob(ctx, x, xopt, fopt, R)
         }
-        Function::Discus => todo!(),
+        Function::Discus => {
+            let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
+            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+
+            functions::discus_bbob(ctx, x, xopt, fopt, R)
+        }
         Function::BentCigar => todo!(),
         Function::SharpRidge => todo!(),
         Function::DifferentPowers => todo!(),

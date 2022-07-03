@@ -50,12 +50,6 @@ entry attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: []
     |> (** 0.9)
     |> (+ fopt)
 
-entry ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
-    x
-    |> t.shift xopt |> mat'vec R |> t.x_osz
-    |> raw.ellipsoidal
-    |> (+fopt)
-
 local def step_ellipsoidal_round (zi: f64): f64 =
     if (f64.abs zi) > 0.5
     then f64.floor(zi + 0.5)
@@ -85,4 +79,16 @@ entry rosenbrock_rotated (x: []f64) (R: [][]f64) (fopt: f64): f64 =
     |> map (* (f64.max 1 ( (f64.sqrt (dim x)) / 8 )))
     |> map (+ 0.5)
     |> raw.rosenbrock
+    |> (+ fopt)
+
+entry ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec R |> t.x_osz
+    |> raw.ellipsoidal
+    |> (+fopt)
+
+entry discus (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec R |> t.x_osz
+    |> raw.discus
     |> (+ fopt)
