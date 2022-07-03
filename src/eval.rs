@@ -58,6 +58,11 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         }
     }
 
+    // No clue why they did this, probably it was a typo?
+    if function == Function::BentCigar {
+        xopt = coco_legacy::compute_xopt(rseed + 1000000, x.len());
+    }
+
     let x = &accelerated::storage::F64_1D::new(ctx, x);
     let xopt = &accelerated::storage::F64_1D::new(ctx, &xopt);
 
@@ -102,7 +107,12 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::discus_bbob(ctx, x, xopt, fopt, R)
         }
-        Function::BentCigar => todo!(),
+        Function::BentCigar => {
+            let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
+            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+
+            functions::bent_cigar_bbob(ctx, x, xopt, fopt, R)
+        }
         Function::SharpRidge => todo!(),
         Function::DifferentPowers => todo!(),
         Function::RastriginRotated => todo!(),

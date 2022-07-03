@@ -21,6 +21,32 @@ fn run_bbob(ctx: &Context, function: BbobFn, x: &F64_1D, xopt: &F64_1D, fopt: f6
     (status && sync_status).then(|| out)
 }
 
+type RotatedBbobFn = unsafe extern "C" fn(
+    ctx: *mut sys::futhark_context,
+    y: *mut f64,
+    x: *const sys::futhark_f64_1d,
+    xopt: *const sys::futhark_f64_1d,
+    fopt: f64,
+    R: *const sys::futhark_f64_2d,
+) -> ::std::os::raw::c_int;
+
+fn run_rotated_bbob(
+    ctx: &Context,
+    function: RotatedBbobFn,
+    x: &F64_1D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+) -> Option<f64> {
+    let mut out = 0f64;
+    let out_ptr = &mut out as *mut f64;
+
+    let status = unsafe { (function)(ctx.inner, out_ptr, x.inner, xopt.inner, fopt, R.inner) == 0 };
+    let sync_status = ctx.sync();
+
+    (status && sync_status).then(|| out)
+}
+
 pub fn sphere_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
     run_bbob(ctx, sys::futhark_entry_sphere, x, xopt, fopt)
 }
@@ -114,31 +140,26 @@ pub fn ellipsoidal_rotated_bbob(
     fopt: f64,
     R: &F64_2D,
 ) -> Option<f64> {
-    {
-        let function = sys::futhark_entry_ellipsoidal_rotated;
-
-        let mut out = 0f64;
-        let out_ptr = &mut out as *mut f64;
-
-        let status =
-            unsafe { (function)(ctx.inner, out_ptr, x.inner, xopt.inner, fopt, R.inner) == 0 };
-        let sync_status = ctx.sync();
-
-        (status && sync_status).then(|| out)
-    }
+    run_rotated_bbob(
+        ctx,
+        sys::futhark_entry_ellipsoidal_rotated,
+        x,
+        xopt,
+        fopt,
+        R,
+    )
 }
 
 pub fn discus_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64, R: &F64_2D) -> Option<f64> {
-    {
-        let function = sys::futhark_entry_discus;
+    run_rotated_bbob(ctx, sys::futhark_entry_discus, x, xopt, fopt, R)
+}
 
-        let mut out = 0f64;
-        let out_ptr = &mut out as *mut f64;
-
-        let status =
-            unsafe { (function)(ctx.inner, out_ptr, x.inner, xopt.inner, fopt, R.inner) == 0 };
-        let sync_status = ctx.sync();
-
-        (status && sync_status).then(|| out)
-    }
+pub fn bent_cigar_bbob(
+    ctx: &Context,
+    x: &F64_1D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+) -> Option<f64> {
+    run_rotated_bbob(ctx, sys::futhark_entry_bent_cigar, x, xopt, fopt, R)
 }

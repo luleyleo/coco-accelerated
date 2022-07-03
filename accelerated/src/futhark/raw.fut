@@ -38,3 +38,8 @@ def rosenbrock (x: []f64): f64 =
 
 def discus (x: []f64): f64 =
     (10**6) * (x[0]**2) + sphere x[1:]
+
+-- f11: bent_cigar
+
+def bent_cigar (x: []f64): f64 =
+    (x[0]**2) + (10**6) * (sphere x[1:])

@@ -92,3 +92,9 @@ entry discus (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     |> t.shift xopt |> mat'vec R |> t.x_osz
     |> raw.discus
     |> (+ fopt)
+
+entry bent_cigar (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec R |> t.asy 0.5 |> mat'vec R
+    |> raw.bent_cigar
+    |> (+ fopt)
