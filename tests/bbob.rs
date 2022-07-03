@@ -37,6 +37,9 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::StepEllipsoid, |c, a| {
         assert_float_eq!(c, a);
     }),
+    (Function::Rosenbrock, |c, a| {
+        assert_float_eq!(c, a);
+    }),
     (Function::EllipsoidRotated, |c, a| {
         assert_float_eq!(c, a);
     }),

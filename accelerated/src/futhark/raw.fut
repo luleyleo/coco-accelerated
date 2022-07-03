@@ -26,3 +26,11 @@ local def step_ellipsoidal_factor (x: []f64) (i: i64): f64 =
 
 def step_ellipsoidal (x: []f64): f64 =
     f64.sum (map (step_ellipsoidal_factor x) (indices x))
+
+-- f08: rosenbrock
+
+def rosenbrock (x: []f64): f64 =
+    let n = length x in
+    (0 ..< (n - 1))
+    |> map (\i -> 100 * (x[i]**2 - x[i+1])**2 + (x[i] - 1)**2)
+    |> f64.sum

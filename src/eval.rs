@@ -50,6 +50,14 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         }
     }
 
+    // According to the documentation, xopt should be within [-3, 3],
+    // but this is not enough to satisfy that condition...
+    if function == Function::Rosenbrock {
+        for xi in &mut xopt {
+            *xi *= 0.75;
+        }
+    }
+
     let x = &accelerated::storage::F64_1D::new(ctx, x);
     let xopt = &accelerated::storage::F64_1D::new(ctx, &xopt);
 
@@ -75,7 +83,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::step_ellipsoidal_bbob(ctx, x, xopt, fopt, R, Q)
         }
-        Function::Rosenbrock => todo!(),
+        Function::Rosenbrock => functions::rosenbrock_bbob(ctx, x, xopt, fopt),
         Function::RosenbrockRotated => todo!(),
         Function::EllipsoidRotated => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
