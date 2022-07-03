@@ -1,4 +1,7 @@
 
+def dim (x: []f64): f64 =
+    f64.i64 (length x)
+
 -- like (-) but the parameters are swapped
 def subbed (a: f64) (b: f64) = b - a
 

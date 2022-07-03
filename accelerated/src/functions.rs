@@ -95,6 +95,18 @@ pub fn rosenbrock_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> O
     run_bbob(ctx, sys::futhark_entry_rosenbrock, x, xopt, fopt)
 }
 
+pub fn rosenbrock_rotated_bbob(ctx: &Context, x: &F64_1D, R: &F64_2D, fopt: f64) -> Option<f64> {
+    let function = sys::futhark_entry_rosenbrock_rotated;
+
+    let mut out = 0f64;
+    let out_ptr = &mut out as *mut f64;
+
+    let status = unsafe { (function)(ctx.inner, out_ptr, x.inner, R.inner, fopt) == 0 };
+    let sync_status = ctx.sync();
+
+    (status && sync_status).then(|| out)
+}
+
 pub fn ellipsoidal_rotated_bbob(
     ctx: &Context,
     x: &F64_1D,

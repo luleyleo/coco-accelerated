@@ -84,7 +84,12 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
             functions::step_ellipsoidal_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::Rosenbrock => functions::rosenbrock_bbob(ctx, x, xopt, fopt),
-        Function::RosenbrockRotated => todo!(),
+        Function::RosenbrockRotated => {
+            let R = coco_legacy::compute_rotation(rseed, dimension);
+            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+
+            functions::rosenbrock_rotated_bbob(ctx, x, R, fopt)
+        }
         Function::EllipsoidRotated => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
             let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);

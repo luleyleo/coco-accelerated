@@ -74,7 +74,15 @@ entry step_ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][
 entry rosenbrock (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     x
     |> t.shift xopt
-    |> map (* (f64.max 1 ( (f64.sqrt (f64.i64 (length x))) / 8 )))
+    |> map (* (f64.max 1 ((f64.sqrt (dim x)) / 8)))
     |> map (+ 1)
+    |> raw.rosenbrock
+    |> (+ fopt)
+
+entry rosenbrock_rotated (x: []f64) (R: [][]f64) (fopt: f64): f64 =
+    x
+    |> mat'vec R
+    |> map (* (f64.max 1 ( (f64.sqrt (dim x)) / 8 )))
+    |> map (+ 0.5)
     |> raw.rosenbrock
     |> (+ fopt)
