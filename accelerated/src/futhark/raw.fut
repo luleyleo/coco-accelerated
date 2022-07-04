@@ -43,3 +43,8 @@ def discus (x: []f64): f64 =
 
 def bent_cigar (x: []f64): f64 =
     (x[0]**2) + (10**6) * (sphere x[1:])
+
+-- f13: sharp_ridge
+
+def sharp_ridge (x: []f64): f64 =
+    (x[0]**2) + 100 * f64.sqrt (sphere x[1:])

@@ -114,3 +114,14 @@ pub fn bent_cigar_bbob(
 ) -> Option<f64> {
     run::rotated_bbob(ctx, sys::futhark_entry_bent_cigar, x, xopt, fopt, R)
 }
+
+pub fn sharp_ridge_bbob(
+    ctx: &Context,
+    x: &F64_1D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+    Q: &F64_2D,
+) -> Option<f64> {
+    run::double_rotated_bbob(ctx, sys::futhark_entry_sharp_ridge, x, xopt, fopt, R, Q)
+}

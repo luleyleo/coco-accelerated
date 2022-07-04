@@ -15,43 +15,31 @@ macro_rules! assert_float_eq {
     };
 }
 
+#[track_caller]
+fn strict(c: f64, a: f64) {
+    assert_float_eq!(c, a);
+}
+
 static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
-    (Function::Sphere, |c, a| {
-        assert_float_eq!(c, a);
-    }),
+    (Function::Sphere, strict),
     (Function::Ellipsoid, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-12);
     }),
     (Function::Rastrigin, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-10);
     }),
-    (Function::BuecheRastrigin, |c, a| {
-        assert_float_eq!(c, a);
-    }),
-    (Function::LinearSlope, |c, a| {
-        assert_float_eq!(c, a);
-    }),
+    (Function::BuecheRastrigin, strict),
+    (Function::LinearSlope, strict),
     (Function::AttractiveSector, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-9);
     }),
-    (Function::StepEllipsoid, |c, a| {
-        assert_float_eq!(c, a);
-    }),
-    (Function::Rosenbrock, |c, a| {
-        assert_float_eq!(c, a);
-    }),
-    (Function::RosenbrockRotated, |c, a| {
-        assert_float_eq!(c, a);
-    }),
-    (Function::EllipsoidRotated, |c, a| {
-        assert_float_eq!(c, a);
-    }),
-    (Function::Discus, |c, a| {
-        assert_float_eq!(c, a);
-    }),
-    (Function::BentCigar, |c, a| {
-        assert_float_eq!(c, a);
-    }),
+    (Function::StepEllipsoid, strict),
+    (Function::Rosenbrock, strict),
+    (Function::RosenbrockRotated, strict),
+    (Function::EllipsoidRotated, strict),
+    (Function::Discus, strict),
+    (Function::BentCigar, strict),
+    (Function::SharpRidge, strict),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

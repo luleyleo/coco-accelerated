@@ -115,7 +115,14 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::bent_cigar_bbob(ctx, x, xopt, fopt, R)
         }
-        Function::SharpRidge => todo!(),
+        Function::SharpRidge => {
+            let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
+            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let Q = coco_legacy::compute_rotation(rseed, dimension);
+            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+
+            functions::sharp_ridge_bbob(ctx, x, xopt, fopt, R, Q)
+        }
         Function::DifferentPowers => todo!(),
         Function::RastriginRotated => todo!(),
         Function::Weierstrass => todo!(),
