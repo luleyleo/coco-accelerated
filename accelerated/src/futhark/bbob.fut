@@ -110,3 +110,10 @@ entry different_powers (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     |> t.shift xopt |> mat'vec R
     |> raw.different_powers
     |> (+ fopt)
+
+entry rastrigin_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec R |> t.x_osz
+    |> t.asy 0.2 |> mat'vec Q |> t.A 10 |> mat'vec R
+    |> raw.rastrigin
+    |> (+ fopt)
