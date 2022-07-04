@@ -104,3 +104,9 @@ entry sharp_ridge (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64)
     |> t.shift xopt |> mat'vec Q |> t.A 10 |> mat'vec R
     |> raw.sharp_ridge
     |> (+ fopt)
+
+entry different_powers (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+    x
+    |> t.shift xopt |> mat'vec R
+    |> raw.different_powers
+    |> (+ fopt)

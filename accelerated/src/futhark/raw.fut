@@ -48,3 +48,11 @@ def bent_cigar (x: []f64): f64 =
 
 def sharp_ridge (x: []f64): f64 =
     (x[0]**2) + 100 * f64.sqrt (sphere x[1:])
+
+-- f14: different_powers
+
+local def different_powers_factor (x: []f64) (i: i64): f64 =
+    (f64.abs x[i]) ** (2 + 4 * (idr i (length x)))
+
+def different_powers (x: []f64): f64 =
+    f64.sqrt (f64.sum (map (different_powers_factor x) (indices x)))
