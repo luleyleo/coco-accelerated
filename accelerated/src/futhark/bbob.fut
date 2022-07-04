@@ -43,7 +43,7 @@ entry linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
 
 entry attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec Q |> t.A 10 |> mat'vec R
+    |> t.shift xopt |> t.rotate Q |> t.A 10 |> t.rotate R
     |> zip xopt |> map (\(xopti, xi) -> if xi * xopti > 0 then 100 * xi else xi)
     |> raw.sphere
     |> t.y_osz
@@ -56,8 +56,8 @@ local def step_ellipsoidal_round (zi: f64): f64 =
     else f64.floor(zi * 10 + 0.5) / 10
 
 entry step_ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
-    let z' = x |> t.shift xopt |> mat'vec R |> t.A 10 in
-    let z = x |> t.shift xopt |> mat'vec Q |> t.A 10 |> map step_ellipsoidal_round |> mat'vec R in
+    let z' = x |> t.shift xopt |> t.rotate R |> t.A 10 in
+    let z = x |> t.shift xopt |> t.rotate Q |> t.A 10 |> map step_ellipsoidal_round |> t.rotate R in
     z
     |> raw.step_ellipsoidal
     |> f64.max ((f64.abs z'[0]) / 10**4)
@@ -75,7 +75,7 @@ entry rosenbrock (x: []f64) (xopt: []f64) (fopt: f64): f64 =
 
 entry rosenbrock_rotated (x: []f64) (R: [][]f64) (fopt: f64): f64 =
     x
-    |> mat'vec R
+    |> t.rotate R
     |> map (* (f64.max 1 ( (f64.sqrt (dim x)) / 8 )))
     |> map (+ 0.5)
     |> raw.rosenbrock
@@ -83,37 +83,37 @@ entry rosenbrock_rotated (x: []f64) (R: [][]f64) (fopt: f64): f64 =
 
 entry ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec R |> t.x_osz
+    |> t.shift xopt |> t.rotate R |> t.x_osz
     |> raw.ellipsoidal
     |> (+fopt)
 
 entry discus (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec R |> t.x_osz
+    |> t.shift xopt |> t.rotate R |> t.x_osz
     |> raw.discus
     |> (+ fopt)
 
 entry bent_cigar (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec R |> t.asy 0.5 |> mat'vec R
+    |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate R
     |> raw.bent_cigar
     |> (+ fopt)
 
 entry sharp_ridge (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec Q |> t.A 10 |> mat'vec R
+    |> t.shift xopt |> t.rotate Q |> t.A 10 |> t.rotate R
     |> raw.sharp_ridge
     |> (+ fopt)
 
 entry different_powers (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec R
+    |> t.shift xopt |> t.rotate R
     |> raw.different_powers
     |> (+ fopt)
 
 entry rastrigin_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
-    |> t.shift xopt |> mat'vec R |> t.x_osz
-    |> t.asy 0.2 |> mat'vec Q |> t.A 10 |> mat'vec R
+    |> t.shift xopt |> t.rotate R |> t.x_osz
+    |> t.asy 0.2 |> t.rotate Q |> t.A 10 |> t.rotate R
     |> raw.rastrigin
     |> (+ fopt)

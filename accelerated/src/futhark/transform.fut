@@ -15,6 +15,7 @@ def x_osz (x: []f64): []f64 =
 
 def y_osz (y: f64): f64 = x_osz_elem y
 
+
 local def asy_elem (b: f64) (x: []f64) (i: i64): f64 =
     let xi = x[i] in
     if xi > 0
@@ -40,3 +41,7 @@ def pen (x: []f64): f64 =
     |> map (f64.max 0)
     |> map (**2)
     |> f64.sum
+
+
+def rotate (R: [][]f64) (x: []f64): []f64 =
+    mat'vec R x
