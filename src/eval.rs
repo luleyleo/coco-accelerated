@@ -153,7 +153,14 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::schaffers_f7_bbob(ctx, x, xopt, fopt, R, Q)
         }
-        Function::Schaffers2 => todo!(),
+        Function::Schaffers2 => {
+            let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
+            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let Q = coco_legacy::compute_rotation(rseed, dimension);
+            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+
+            functions::schaffers_f7_ill_bbob(ctx, x, xopt, fopt, R, Q)
+        }
         Function::GriewankRosenbrock => todo!(),
         Function::Schwefel => todo!(),
         Function::Gallagher1 => todo!(),

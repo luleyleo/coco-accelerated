@@ -46,6 +46,9 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::Schaffers1, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-13);
     }),
+    (Function::Schaffers2, |c, a| {
+        assert_float_eq!(c, a, abs <= 1e-11);
+    }),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

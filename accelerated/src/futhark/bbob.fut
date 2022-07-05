@@ -132,3 +132,10 @@ entry schaffers_f7 (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64
     |> raw.schaffers_f7
     |> (+ 10 * t.pen x)
     |> (+ fopt)
+
+entry schaffers_f7_ill (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+    x
+    |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate Q |> t.A 1000
+    |> raw.schaffers_f7
+    |> (+ 10 * t.pen x)
+    |> (+ fopt)
