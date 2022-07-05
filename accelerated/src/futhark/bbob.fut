@@ -125,3 +125,10 @@ entry weierstrass (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64)
     |> raw.weierstrass
     |> (+ (10 / dim x) * t.pen x)
     |> (+ fopt)
+
+entry schaffers_f7 (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+    x
+    |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate Q |> t.A 10
+    |> raw.schaffers_f7
+    |> (+ 10 * t.pen x)
+    |> (+ fopt)

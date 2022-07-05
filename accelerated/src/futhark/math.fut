@@ -29,3 +29,7 @@ def mat'mat [n][m][p] (A: [n][m]f64) (B: [m][p]f64) : [n][p]f64 =
 
 def mat'vec [n] (M: [n][n]f64) (V: [n]f64) : [n]f64 =
     M |> map (map2 (*) V) |> map f64.sum
+
+-- returns indecies neighboring pairs of x
+def pair_indices (x: []f64): []i64 =
+    (0 ..< (length x - 1))

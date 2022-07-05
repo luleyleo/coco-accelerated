@@ -29,8 +29,7 @@ def step_ellipsoidal (x: []f64): f64 =
 -- f08: rosenbrock
 
 def rosenbrock (x: []f64): f64 =
-    let n = length x in
-    (0 ..< (n - 1))
+    pair_indices x
     |> map (\i -> 100 * (x[i]**2 - x[i+1])**2 + (x[i] - 1)**2)
     |> f64.sum
 
@@ -71,3 +70,10 @@ def weierstrass_f0: f64 =
 
 def weierstrass (x: []f64): f64 =
     10 * ((f64.sum (map weierstrass_sum x) - weierstrass_f0) / dim x)**3
+
+-- f17: schaffers_f7
+
+def schaffers_f7 (x: []f64) =
+    let s = pair_indices x |> map (\i -> f64.sqrt (x[i]**2 + x[i+1]**2)) in
+    let factors = map (\si -> f64.sqrt(si) * (1 + f64.sin(50 * si**0.2)**2)) s in
+    ((f64.sum factors) / (dim x - 1))**2
