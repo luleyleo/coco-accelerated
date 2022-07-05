@@ -207,3 +207,7 @@ pub fn griewank_rosenbrock_bbob(ctx: &Context, x: &F64_1D, fopt: f64, R: &F64_2D
 
     (status && sync_status).then(|| out)
 }
+
+pub fn schwefel_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> Option<f64> {
+    run::bbob(ctx, sys::futhark_entry_schwefel, x, xopt, fopt)
+}

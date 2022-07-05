@@ -90,3 +90,8 @@ def griewank_rosenbrock (x: []f64): f64 =
     |> f64.sum
     |> (* 10 / (dim x - 1))
     |> (+ 10)
+
+-- f20: schwefel
+
+def schwefel (x: []f64): f64 =
+    - f64.sum (map (\xi -> xi * f64.sin (f64.sqrt (f64.abs (xi)))) x) / (100 * dim x) + 4.189828872724339

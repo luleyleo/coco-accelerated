@@ -62,6 +62,12 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
             // No clue why they did this, probably it was a typo?
             xopt = coco_legacy::compute_xopt(rseed + 1000000, x.len());
         }
+        Function::Schwefel => {
+            xopt = coco_legacy::compute_unif(rseed, x.len());
+            for xi in &mut xopt {
+                *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
+            }
+        }
         _ => {}
     }
 
@@ -167,7 +173,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::griewank_rosenbrock_bbob(ctx, x, fopt, R)
         }
-        Function::Schwefel => todo!(),
+        Function::Schwefel => functions::schwefel_bbob(ctx, x, xopt, fopt),
         Function::Gallagher1 => todo!(),
         Function::Gallagher2 => todo!(),
         Function::Katsuura => todo!(),

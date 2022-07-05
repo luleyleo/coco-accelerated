@@ -147,3 +147,19 @@ entry griewank_rosenbrock (x: []f64) (fopt: f64) (R: [][]f64): f64 =
     |> map (+ 0.5)
     |> raw.griewank_rosenbrock
     |> (+ fopt)
+
+local def schwefel_z (x: *[]f64) (xopt: []f64): *[]f64 =
+    let n = length x in
+    loop acc = x for i in 1 ..< n do
+        acc with [i] = acc[i] + 0.25 * (acc[i-1] - xopt[i-1])
+
+entry schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
+    let xopt = map (* 4.2096874633/2) xopt_sign in
+    let x' = map (2 *) (map2 (*) xopt_sign x) in
+    let xopt2 = xopt |> map f64.abs |> map (*2) in
+    let z' = schwefel_z x' xopt2 in
+    let z = z' |> map2 subbed xopt2 |> t.A 10 |> map2 (+) xopt2 |> map (* 100) in
+    z
+    |> raw.schwefel
+    |> (+ 100 * t.pen (map (/ 100) z))
+    |> (+ fopt)

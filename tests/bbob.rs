@@ -52,6 +52,7 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::GriewankRosenbrock, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-11);
     }),
+    //(Function::Schwefel, strict),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

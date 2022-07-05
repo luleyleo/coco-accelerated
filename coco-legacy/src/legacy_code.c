@@ -37,7 +37,7 @@ static double bbob2009_round(double x)
 /**
  * @brief Generates N uniform random numbers using inseed as the seed and stores them in r.
  */
-static void bbob2009_unif(double *r, size_t N, long inseed)
+void bbob2009_unif(double *r, size_t N, long inseed)
 {
     /* generates N uniform numbers with starting seed */
     long aktseed;
