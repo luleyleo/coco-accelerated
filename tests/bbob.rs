@@ -42,6 +42,7 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::SharpRidge, strict),
     (Function::DifferentPowers, strict),
     (Function::RastriginRotated, strict),
+    //(Function::Weierstrass, strict),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

@@ -154,3 +154,14 @@ pub fn rastrigin_rotated_bbob(
         Q,
     )
 }
+
+pub fn weierstrass_bbob(
+    ctx: &Context,
+    x: &F64_1D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+    Q: &F64_2D,
+) -> Option<f64> {
+    run::double_rotated_bbob(ctx, sys::futhark_entry_weierstrass, x, xopt, fopt, R, Q)
+}

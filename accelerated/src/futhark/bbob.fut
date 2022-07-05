@@ -117,3 +117,11 @@ entry rastrigin_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: []
     |> t.asy 0.2 |> t.rotate Q |> t.A 10 |> t.rotate R
     |> raw.rastrigin
     |> (+ fopt)
+
+entry weierstrass (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+    x
+    |> t.shift xopt |> t.rotate R
+    |> t.x_osz |> t.rotate Q |> t.A 0.01 |> t.rotate R
+    |> raw.weierstrass
+    |> (+ (10 / dim x) * t.pen x)
+    |> (+ fopt)

@@ -56,3 +56,18 @@ local def different_powers_factor (x: []f64) (i: i64): f64 =
 
 def different_powers (x: []f64): f64 =
     f64.sqrt (f64.sum (map (different_powers_factor x) (indices x)))
+
+-- f16: weierstrass
+
+def weierstrass_factor (xi: f64) (k: f64): f64 =
+    (0.5**k) * f64.cos (2 * f64.pi * (3**k) * (xi + 0.5))
+
+def weierstrass_sum (xi: f64): f64 =
+    let k = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] in
+    f64.sum (map (weierstrass_factor xi) k)
+
+def weierstrass_f0: f64 =
+    weierstrass_sum 0
+
+def weierstrass (x: []f64): f64 =
+    10 * ((f64.sum (map weierstrass_sum x) - weierstrass_f0) / dim x)**3
