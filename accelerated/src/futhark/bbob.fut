@@ -73,7 +73,7 @@ entry rosenbrock (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     |> raw.rosenbrock
     |> (+ fopt)
 
-entry rosenbrock_rotated (x: []f64) (R: [][]f64) (fopt: f64): f64 =
+entry rosenbrock_rotated (x: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.rotate R
     |> map (* (f64.max 1 ( (f64.sqrt (dim x)) / 8 )))
@@ -138,4 +138,12 @@ entry schaffers_f7_ill (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][
     |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate Q |> t.A 1000
     |> raw.schaffers_f7
     |> (+ 10 * t.pen x)
+    |> (+ fopt)
+
+entry griewank_rosenbrock (x: []f64) (fopt: f64) (R: [][]f64): f64 =
+    x
+    |> t.rotate R
+    |> map (* (f64.max 1 ((f64.sqrt (dim x)) / 8)))
+    |> map (+ 0.5)
+    |> raw.griewank_rosenbrock
     |> (+ fopt)

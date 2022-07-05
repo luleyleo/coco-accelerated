@@ -95,7 +95,7 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
             let R = coco_legacy::compute_rotation(rseed, dimension);
             let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
 
-            functions::rosenbrock_rotated_bbob(ctx, x, R, fopt)
+            functions::rosenbrock_rotated_bbob(ctx, x, fopt, R)
         }
         Function::EllipsoidRotated => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
@@ -161,7 +161,12 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
 
             functions::schaffers_f7_ill_bbob(ctx, x, xopt, fopt, R, Q)
         }
-        Function::GriewankRosenbrock => todo!(),
+        Function::GriewankRosenbrock => {
+            let R = coco_legacy::compute_rotation(rseed, dimension);
+            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+
+            functions::griewank_rosenbrock_bbob(ctx, x, fopt, R)
+        }
         Function::Schwefel => todo!(),
         Function::Gallagher1 => todo!(),
         Function::Gallagher2 => todo!(),

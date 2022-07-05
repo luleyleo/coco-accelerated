@@ -28,9 +28,12 @@ def step_ellipsoidal (x: []f64): f64 =
 
 -- f08: rosenbrock
 
+local def rosenbrock_factor (x1: f64) (x2: f64): f64 =
+    100 * (x1**2 - x2)**2 + (x1 - 1)**2
+
 def rosenbrock (x: []f64): f64 =
     pair_indices x
-    |> map (\i -> 100 * (x[i]**2 - x[i+1])**2 + (x[i] - 1)**2)
+    |> map (\i -> rosenbrock_factor x[i] x[i+1])
     |> f64.sum
 
 -- f11: discus
@@ -77,3 +80,13 @@ def schaffers_f7 (x: []f64) =
     let s = pair_indices x |> map (\i -> f64.sqrt (x[i]**2 + x[i+1]**2)) in
     let factors = map (\si -> f64.sqrt(si) * (1 + f64.sin(50 * si**0.2)**2)) s in
     ((f64.sum factors) / (dim x - 1))**2
+
+-- f19: griewank_rosenbrock
+
+def griewank_rosenbrock (x: []f64): f64 =
+    pair_indices x
+    |> map (\i -> (rosenbrock_factor x[i] x[i+1]))
+    |> map (\xi -> (xi) / 4000 - f64.cos(xi))
+    |> f64.sum
+    |> (* 10 / (dim x - 1))
+    |> (+ 10)

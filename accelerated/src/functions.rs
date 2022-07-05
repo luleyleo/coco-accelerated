@@ -72,13 +72,13 @@ pub fn rosenbrock_bbob(ctx: &Context, x: &F64_1D, xopt: &F64_1D, fopt: f64) -> O
     run::bbob(ctx, sys::futhark_entry_rosenbrock, x, xopt, fopt)
 }
 
-pub fn rosenbrock_rotated_bbob(ctx: &Context, x: &F64_1D, R: &F64_2D, fopt: f64) -> Option<f64> {
+pub fn rosenbrock_rotated_bbob(ctx: &Context, x: &F64_1D, fopt: f64, R: &F64_2D) -> Option<f64> {
     let function = sys::futhark_entry_rosenbrock_rotated;
 
     let mut out = 0f64;
     let out_ptr = &mut out as *mut f64;
 
-    let status = unsafe { (function)(ctx.inner, out_ptr, x.inner, R.inner, fopt) == 0 };
+    let status = unsafe { (function)(ctx.inner, out_ptr, x.inner, fopt, R.inner) == 0 };
     let sync_status = ctx.sync();
 
     (status && sync_status).then(|| out)
@@ -194,4 +194,16 @@ pub fn schaffers_f7_ill_bbob(
         R,
         Q,
     )
+}
+
+pub fn griewank_rosenbrock_bbob(ctx: &Context, x: &F64_1D, fopt: f64, R: &F64_2D) -> Option<f64> {
+    let function = sys::futhark_entry_griewank_rosenbrock;
+
+    let mut out = 0f64;
+    let out_ptr = &mut out as *mut f64;
+
+    let status = unsafe { (function)(ctx.inner, out_ptr, x.inner, fopt, R.inner) == 0 };
+    let sync_status = ctx.sync();
+
+    (status && sync_status).then(|| out)
 }
