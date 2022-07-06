@@ -12,6 +12,8 @@ fn main() {
 
     let compiler = if cfg!(feature = "opencl") {
         "opencl"
+    } else if cfg!(feature = "multicore") {
+        "multicore"
     } else {
         "c"
     };

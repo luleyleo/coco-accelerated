@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 opencl = []
+multicore = []
 
 [build-dependencies]
 bindgen = "0.59.2"

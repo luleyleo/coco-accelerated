@@ -12,6 +12,7 @@ harness = false
 
 [features]
 opencl = ["accelerated/opencl"]
+multicore = ["accelerated/multicore"]
 
 [dependencies]
 coco = { version = "0.5.0", package = "coco-rs" }
