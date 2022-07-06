@@ -2,10 +2,10 @@
 
 use std::cell::RefCell;
 
-use crate::bbob::Function;
-
-pub mod bbob;
+mod bbob;
 mod eval;
+
+pub use crate::bbob::{Function, DIMENSIONS};
 
 pub struct Context {
     pub coco: RefCell<coco::Suite>,
@@ -53,5 +53,17 @@ impl<'c> Problem<'c> {
 
     pub fn eval_accelerated(&mut self, x: &[f64]) -> f64 {
         eval::accelerated(self, x)
+    }
+
+    pub fn eval_available(&mut self, x: &[f64]) -> f64 {
+        match self.function {
+            Function::Weierstrass
+            | Function::Schwefel
+            | Function::Gallagher1
+            | Function::Gallagher2
+            | Function::Katsuura
+            | Function::LunacekBiRastrigin => eval::coco(self, x),
+            _ => eval::accelerated(self, x),
+        }
     }
 }

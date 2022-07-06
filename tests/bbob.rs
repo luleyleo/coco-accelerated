@@ -1,6 +1,6 @@
 #![allow(clippy::type_complexity)]
 
-use coco_accelerated::{bbob::Function, Context, Problem};
+use coco_accelerated::{Context, Function, Problem};
 use proptest::{
     prelude::*,
     test_runner::{FileFailurePersistence, TestError, TestRunner},

@@ -29,6 +29,37 @@ pub enum Function {
     LunacekBiRastrigin,
 }
 
+impl Function {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Function::Sphere => "sphere",
+            Function::Ellipsoid => "ellipsoid",
+            Function::Rastrigin => "rastrigin",
+            Function::BuecheRastrigin => "bueche_rastrigin",
+            Function::LinearSlope => "linear_slope",
+            Function::AttractiveSector => "attractive_sector",
+            Function::StepEllipsoid => "step_ellipsoid",
+            Function::Rosenbrock => "rosenbrock",
+            Function::RosenbrockRotated => "rosenbrock_rotated",
+            Function::EllipsoidRotated => "ellipsoid_rotated",
+            Function::Discus => "discus",
+            Function::BentCigar => "bent_cigar",
+            Function::SharpRidge => "sharp_ridge",
+            Function::DifferentPowers => "different_powers",
+            Function::RastriginRotated => "rastrigin_rotated",
+            Function::Weierstrass => "weierstrass",
+            Function::Schaffers1 => "schaffers1",
+            Function::Schaffers2 => "schaffers2",
+            Function::GriewankRosenbrock => "griewank_rosenbrock",
+            Function::Schwefel => "schwefel",
+            Function::Gallagher1 => "gallagher1",
+            Function::Gallagher2 => "gallagher2",
+            Function::Katsuura => "katsuura",
+            Function::LunacekBiRastrigin => "lunacek_bi_rastrigin",
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::bbob::Function;
