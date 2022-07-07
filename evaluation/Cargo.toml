@@ -1,0 +1,21 @@
+[package]
+name = "evaluation"
+version = "0.1.0"
+edition = "2021"
+
+[[bench]]
+name = "single_cpu_eval"
+harness = false
+
+[dependencies.coco-reference]
+package = "coco-rs"
+version = "0.5.0"
+
+[dependencies.coco-accelerated]
+path = "../coco-accelerated"
+
+[dev-dependencies]
+criterion = "0.3.5"
+once_cell = "1.12.0"
+proptest = "1.0.0"
+float_eq = "1.0.0"

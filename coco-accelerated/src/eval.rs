@@ -1,5 +1,8 @@
 use crate::{bbob::Function, Problem};
-use accelerated::functions;
+use coco_futhark::{
+    functions,
+    storage::{F64_1D, F64_2D},
+};
 
 pub fn coco(problem: &Problem, x: &[f64]) -> f64 {
     let mut suite = problem.context.coco.borrow_mut();
@@ -71,8 +74,8 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         _ => {}
     }
 
-    let x = &accelerated::storage::F64_1D::new(ctx, x);
-    let xopt = &accelerated::storage::F64_1D::new(ctx, &xopt);
+    let x = &F64_1D::new(ctx, x);
+    let xopt = &F64_1D::new(ctx, &xopt);
 
     let result = match function {
         Function::Sphere => functions::sphere_bbob(ctx, x, xopt, fopt),
@@ -82,94 +85,94 @@ pub fn accelerated(problem: &Problem, x: &[f64]) -> f64 {
         Function::LinearSlope => functions::linear_slope_bbob(ctx, x, xopt, fopt),
         Function::AttractiveSector => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::attractive_sector_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::StepEllipsoid => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::step_ellipsoidal_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::Rosenbrock => functions::rosenbrock_bbob(ctx, x, xopt, fopt),
         Function::RosenbrockRotated => {
             let R = coco_legacy::compute_rotation(rseed, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
 
             functions::rosenbrock_rotated_bbob(ctx, x, fopt, R)
         }
         Function::EllipsoidRotated => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
 
             functions::ellipsoidal_rotated_bbob(ctx, x, xopt, fopt, R)
         }
         Function::Discus => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
 
             functions::discus_bbob(ctx, x, xopt, fopt, R)
         }
         Function::BentCigar => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
 
             functions::bent_cigar_bbob(ctx, x, xopt, fopt, R)
         }
         Function::SharpRidge => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::sharp_ridge_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::DifferentPowers => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
 
             functions::different_powers_bbob(ctx, x, xopt, fopt, R)
         }
         Function::RastriginRotated => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::rastrigin_rotated_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::Weierstrass => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::weierstrass_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::Schaffers1 => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::schaffers_f7_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::Schaffers2 => {
             let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
             let Q = coco_legacy::compute_rotation(rseed, dimension);
-            let Q = &accelerated::storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+            let Q = &F64_2D::new(ctx, &Q.data, Q.dimension);
 
             functions::schaffers_f7_ill_bbob(ctx, x, xopt, fopt, R, Q)
         }
         Function::GriewankRosenbrock => {
             let R = coco_legacy::compute_rotation(rseed, dimension);
-            let R = &accelerated::storage::F64_2D::new(ctx, &R.data, R.dimension);
+            let R = &F64_2D::new(ctx, &R.data, R.dimension);
 
             functions::griewank_rosenbrock_bbob(ctx, x, fopt, R)
         }

@@ -9,13 +9,13 @@ pub use crate::bbob::{Function, DIMENSIONS};
 
 pub struct Context {
     pub coco: RefCell<coco::Suite>,
-    pub futhark: accelerated::Context,
+    pub futhark: coco_futhark::Context,
 }
 
 impl Context {
     pub fn new() -> Self {
         let coco = RefCell::new(coco::Suite::new(coco::SuiteName::Bbob, "", "").unwrap());
-        let futhark = accelerated::Context::default();
+        let futhark = coco_futhark::Context::default();
         Context { coco, futhark }
     }
 }
