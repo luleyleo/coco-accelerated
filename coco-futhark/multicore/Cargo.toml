@@ -1,0 +1,13 @@
+[package]
+name = "coco-futhark-multicore"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "coco_futhark_multicore"
+path = "../shared/src/lib.rs"
+
+[build-dependencies]
+bindgen = "0.59.2"
+cc = "1.0.73"
+rerun_except = "1.0.0"

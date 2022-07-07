@@ -4,14 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-opencl = ["coco-futhark/opencl"]
-multicore = ["coco-futhark/multicore"]
+c = ["coco-futhark-c"]
+multicore = ["coco-futhark-multicore"]
+default = ["c"]
 
 [dependencies]
 coco = { version = "0.5.0", package = "coco-rs" }
-coco-futhark = { path = "../coco-futhark" }
-coco-legacy = { path = "../coco-legacy" }
 float_eq = "1.0.0"
+coco-legacy = { path = "../coco-legacy" }
+
+coco-futhark-c = { path = "../coco-futhark/c", optional = true }
+coco-futhark-multicore = { path = "../coco-futhark/multicore", optional = true }
 
 [dev-dependencies]
 criterion = "0.3.5"

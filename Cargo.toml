@@ -1,2 +1,2 @@
 [workspace]
-members = ["coco-accelerated", "coco-futhark", "coco-legacy", "evaluation"]
+members = ["coco-accelerated", "coco-legacy", "evaluation", "coco-futhark/c", "coco-futhark/multicore"]

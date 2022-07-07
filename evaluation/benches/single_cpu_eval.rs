@@ -9,7 +9,7 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
             let mut problem = Problem::new(context, function);
             let input = vec![1.0; *dim];
 
-            b.iter(|| problem.eval_accelerated(&input))
+            b.iter(|| problem.eval_futhark_multicore(&input))
         });
         group.bench_with_input(BenchmarkId::new("coco", dim), dim, |b, dim| {
             let context = &Context::new();

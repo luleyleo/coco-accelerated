@@ -84,7 +84,7 @@ fn bbob() {
             let problem = &mut Problem::new(context, function);
 
             let cres = problem.eval_coco(&x);
-            let ares = problem.eval_accelerated(&x);
+            let ares = problem.eval_futhark_c(&x);
 
             check(cres, ares);
 

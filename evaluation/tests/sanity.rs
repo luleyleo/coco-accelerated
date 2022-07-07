@@ -16,6 +16,6 @@ fn can_evaluate_accelerated() {
     let mut problem = Problem::new(context, Function::Sphere);
 
     for dim in DIMENSIONS {
-        let _ = problem.eval_accelerated(&vec![1.0; *dim]);
+        let _ = problem.eval_futhark_multicore(&vec![1.0; *dim]);
     }
 }
