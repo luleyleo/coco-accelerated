@@ -63,10 +63,44 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: &[f64]) -> f64 {
         _ => {}
     }
 
-    let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
-    let Q = coco_legacy::compute_rotation(rseed, dimension);
+    let (nR, nQ) = needs_rotation(function);
+    let R = nR
+        .then(|| coco_legacy::compute_rotation(rseed + 1000000, dimension))
+        .unwrap_or_default();
+    let Q = nQ
+        .then(|| coco_legacy::compute_rotation(rseed, dimension))
+        .unwrap_or_default();
 
     let result = eval_fn(problem.context, x, xopt, R, Q, function, fopt);
 
     result.unwrap_or_else(|| panic!("Failed to evaluate {:?}", function))
+}
+
+fn needs_rotation(function: Function) -> (bool, bool) {
+    match function {
+        Function::Sphere => (false, false),
+        Function::Ellipsoid => (false, false),
+        Function::Rastrigin => (false, false),
+        Function::BuecheRastrigin => (false, false),
+        Function::LinearSlope => (false, false),
+        Function::AttractiveSector => (true, true),
+        Function::StepEllipsoid => (true, true),
+        Function::Rosenbrock => (false, false),
+        Function::RosenbrockRotated => (false, true),
+        Function::EllipsoidRotated => (true, false),
+        Function::Discus => (true, false),
+        Function::BentCigar => (true, false),
+        Function::SharpRidge => (true, true),
+        Function::DifferentPowers => (true, false),
+        Function::RastriginRotated => (true, true),
+        Function::Weierstrass => (true, true),
+        Function::Schaffers1 => (true, true),
+        Function::Schaffers2 => (true, true),
+        Function::GriewankRosenbrock => (false, true),
+        Function::Schwefel => (false, false),
+        Function::Gallagher1 => todo!(),
+        Function::Gallagher2 => todo!(),
+        Function::Katsuura => todo!(),
+        Function::LunacekBiRastrigin => todo!(),
+    }
 }

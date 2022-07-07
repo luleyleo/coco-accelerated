@@ -8,7 +8,7 @@ pub struct F64_2D<'c> {
 
 impl<'c> F64_2D<'c> {
     pub fn new(context: &'c Context, data: &[f64], row_length: usize) -> Self {
-        let rows = data.len() / row_length;
+        let rows = data.len().checked_div(row_length).unwrap_or(0);
         let columns = row_length;
 
         let inner = unsafe {
