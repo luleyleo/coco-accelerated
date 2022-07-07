@@ -1,21 +1,24 @@
-use coco_accelerated::{Context, Function, Problem, DIMENSIONS};
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use coco_accelerated::{Context, Function, Problem};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 pub fn compare_function(c: &mut Criterion, function: Function) {
-    let mut group = c.benchmark_group(function.name());
-    for dim in DIMENSIONS {
-        group.bench_with_input(BenchmarkId::new("accelerated", dim), dim, |b, dim| {
-            let context = &Context::new();
-            let mut problem = Problem::new(context, function);
-            let input = vec![1.0; *dim];
+    let context = &Context::new();
+    let mut problem = Problem::new(context, function);
 
+    let mut group = c.benchmark_group(function.name());
+    for dim in [5, 10, 20, 40] {
+        let input = black_box(vec![1.0; dim]);
+        let id = |name| BenchmarkId::new(name, dim);
+
+        group.bench_with_input(id("futhark_c"), &dim, |b, _dim| {
+            b.iter(|| problem.eval_futhark_c(&input))
+        });
+
+        group.bench_with_input(id("futhark_multicore"), &dim, |b, _dim| {
             b.iter(|| problem.eval_futhark_multicore(&input))
         });
-        group.bench_with_input(BenchmarkId::new("coco", dim), dim, |b, dim| {
-            let context = &Context::new();
-            let mut problem = Problem::new(context, function);
-            let input = vec![1.0; *dim];
 
+        group.bench_with_input(id("coco"), &dim, |b, _dim| {
             b.iter(|| problem.eval_coco(&input))
         });
     }
