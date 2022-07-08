@@ -1,4 +1,4 @@
-#![allow(non_snake_case)]
+#![allow(non_snake_case, clippy::too_many_arguments)]
 
 mod config;
 mod context;

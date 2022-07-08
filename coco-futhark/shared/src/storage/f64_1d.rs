@@ -15,6 +15,10 @@ impl<'c> F64_1D<'c> {
         F64_1D { context, inner }
     }
 
+    /// Wraps an existing `f64_1d` array.
+    ///
+    /// # Safety
+    /// `inner` must be a valid futhark array.
     pub unsafe fn from_raw(context: &'c Context, inner: *mut sys::futhark_f64_1d) -> Self {
         assert!(!inner.is_null());
         F64_1D { context, inner }
