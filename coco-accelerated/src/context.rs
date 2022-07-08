@@ -8,6 +8,9 @@ pub struct Context {
 
     #[cfg(feature = "multicore")]
     pub futhark_multicore: coco_futhark_multicore::Context,
+
+    #[cfg(feature = "opencl")]
+    pub futhark_opencl: coco_futhark_opencl::Context,
 }
 
 impl Context {
@@ -21,6 +24,9 @@ impl Context {
 
             #[cfg(feature = "multicore")]
             futhark_multicore: coco_futhark_multicore::Context::default(),
+
+            #[cfg(feature = "opencl")]
+            futhark_opencl: coco_futhark_opencl::Context::default(),
         }
     }
 }

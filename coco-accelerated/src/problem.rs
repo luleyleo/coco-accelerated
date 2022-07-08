@@ -34,4 +34,9 @@ impl<'c> Problem<'c> {
     pub fn eval_futhark_multicore(&mut self, x: &[f64]) -> f64 {
         eval::futhark_multicore(self, x)
     }
+
+    #[cfg(feature = "opencl")]
+    pub fn eval_futhark_opencl(&mut self, x: &[f64]) -> f64 {
+        eval::futhark_opencl(self, x)
+    }
 }

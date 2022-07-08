@@ -13,3 +13,8 @@ pub use futhark_c::futhark_c;
 mod futhark_multicore;
 #[cfg(feature = "multicore")]
 pub use futhark_multicore::futhark_multicore;
+
+#[cfg(feature = "opencl")]
+mod futhark_opencl;
+#[cfg(feature = "opencl")]
+pub use futhark_opencl::futhark_opencl;

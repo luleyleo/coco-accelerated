@@ -29,9 +29,5 @@ fn build_target(source: &Path, target: &Path, compiler: &str) {
     cc::Build::new()
         .file(target.join("raw.c"))
         .warnings(false)
-        .compile("coco");
-
-    if compiler == "opencl" {
-        println!("cargo:rustc-link-lib=OpenCL");
-    }
+        .compile(&format!("coco-futhark-{compiler}"));
 }

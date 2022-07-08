@@ -22,6 +22,16 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
             b.iter(|| problem.eval_futhark_c(&input))
         });
 
+        #[cfg(feature = "multicore")]
+        group.bench_with_input(id("futhark_multicore"), &dim, |b, _dim| {
+            b.iter(|| problem.eval_futhark_multicore(&input))
+        });
+
+        #[cfg(feature = "opencl")]
+        group.bench_with_input(id("futhark_opencl"), &dim, |b, _dim| {
+            b.iter(|| problem.eval_futhark_opencl(&input))
+        });
+
         group.bench_with_input(id("coco"), &dim, |b, _dim| {
             b.iter(|| problem.eval_coco(&input))
         });
@@ -32,18 +42,9 @@ pub fn benchmark_sphere(c: &mut Criterion) {
     compare_function(c, Function::Sphere);
 }
 
-pub fn benchmark_ellipsoid(c: &mut Criterion) {
-    compare_function(c, Function::Ellipsoid);
-}
-
 pub fn benchmark_schaffers1(c: &mut Criterion) {
     compare_function(c, Function::Schaffers1);
 }
 
-criterion_group!(
-    benches,
-    benchmark_sphere,
-    benchmark_ellipsoid,
-    benchmark_schaffers1
-);
+criterion_group!(benches, benchmark_sphere, benchmark_schaffers1);
 criterion_main!(benches);

@@ -11,11 +11,11 @@ fn can_evaluate_coco() {
 }
 
 #[test]
-fn can_evaluate_accelerated() {
+fn can_evaluate_futhark() {
     let context = &mut Context::default();
     let mut problem = Problem::new(context, Function::Sphere);
 
     for dim in DIMENSIONS {
-        let _ = problem.eval_futhark_multicore(&vec![1.0; *dim]);
+        let _ = problem.eval_futhark_c(&vec![1.0; *dim]);
     }
 }

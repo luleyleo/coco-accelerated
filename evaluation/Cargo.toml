@@ -3,8 +3,12 @@ name = "evaluation"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+multicore = ["coco-accelerated/multicore"]
+opencl = ["coco-accelerated/opencl"]
+
 [[bench]]
-name = "single_cpu_eval"
+name = "single_eval"
 harness = false
 
 [dependencies.coco-reference]
@@ -13,7 +17,7 @@ version = "0.5.0"
 
 [dependencies.coco-accelerated]
 path = "../coco-accelerated"
-features = ["c", "multicore"]
+features = ["c"]
 
 [dev-dependencies]
 criterion = "0.3.5"
