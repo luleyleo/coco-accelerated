@@ -1,11 +1,7 @@
 [package]
-name = "coco-futhark-opencl"
+name = "coco-futhark-shared"
 version = "0.1.0"
 edition = "2021"
-
-[lib]
-name = "coco_futhark_opencl"
-path = "../shared/src/lib.rs"
 
 [build-dependencies]
 futharkc = { path = "../futharkc" }

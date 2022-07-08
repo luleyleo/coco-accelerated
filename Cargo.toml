@@ -1,2 +1,11 @@
 [workspace]
-members = ["coco-accelerated", "coco-legacy", "evaluation", "coco-futhark/c", "coco-futhark/multicore", "coco-futhark/opencl"]
+members = [
+    "evaluation",
+    "coco-legacy",
+    "coco-accelerated",
+    "coco-futhark/futharkc",
+    "coco-futhark/shared",
+    "coco-futhark/c",
+    "coco-futhark/multicore",
+    "coco-futhark/opencl"
+]

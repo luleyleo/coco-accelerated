@@ -8,6 +8,4 @@ name = "coco_futhark_c"
 path = "../shared/src/lib.rs"
 
 [build-dependencies]
-bindgen = "0.59.2"
-cc = "1.0.73"
-rerun_except = "1.0.0"
+futharkc = { path = "../futharkc" }
