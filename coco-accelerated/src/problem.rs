@@ -22,9 +22,22 @@ impl<'c> Problem<'c> {
     pub fn eval_coco(&self, x: InputMatrix) -> Vec<f64> {
         assert!(DIMENSIONS.contains(&x.dimension));
 
+        let mut suite = self.context.coco.borrow_mut();
+        let mut problem = suite
+            .problem_by_function_dimension_instance(
+                self.function as usize,
+                x.dimension(),
+                self.instance,
+            )
+            .unwrap();
+
         let mut output = Vec::with_capacity(x.inputs());
         for x in x.iter_inputs() {
-            output.push(eval::coco(self, x));
+            output.push({
+                let y = &mut [0.0];
+                problem.evaluate_function(x, y);
+                y[0]
+            });
         }
 
         output

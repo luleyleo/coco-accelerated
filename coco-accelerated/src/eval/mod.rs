@@ -1,6 +1,3 @@
-mod coco;
-pub use self::coco::coco;
-
 mod futhark;
 use futhark::eval_futhark;
 
