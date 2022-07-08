@@ -21,6 +21,7 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
 
         let input = InputMatrix::new(&data, dim);
 
+        #[cfg(feature = "c")]
         group.bench_with_input(id("futhark_c"), &batch_size, |b, _dim| {
             b.iter(|| problem.eval_futhark_c(input))
         });

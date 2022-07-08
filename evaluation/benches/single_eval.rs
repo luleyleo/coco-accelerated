@@ -18,6 +18,7 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
             .map(|_| generator.gen_range(-5.0..=5.0))
             .collect::<Vec<f64>>();
 
+        #[cfg(feature = "c")]
         group.bench_with_input(id("futhark_c"), &dim, |b, _dim| {
             b.iter(|| problem.eval_futhark_c_single(&input))
         });
