@@ -1,4 +1,4 @@
-use crate::{eval, Context, Function, DIMENSIONS};
+use crate::{eval, Context, Function, InputMatrix, DIMENSIONS};
 
 pub struct Problem<'c> {
     pub(crate) context: &'c Context,
@@ -19,24 +19,56 @@ impl<'c> Problem<'c> {
         }
     }
 
-    pub fn eval_coco(&mut self, x: &[f64]) -> f64 {
-        assert!(DIMENSIONS.contains(&x.len()));
+    pub fn eval_coco(&self, x: InputMatrix) -> Vec<f64> {
+        assert!(DIMENSIONS.contains(&x.dimension));
 
-        eval::coco(self, x)
+        let mut output = Vec::with_capacity(x.inputs());
+        for x in x.iter_inputs() {
+            output.push(eval::coco(self, x));
+        }
+
+        output
     }
 
     #[cfg(feature = "c")]
-    pub fn eval_futhark_c(&mut self, x: &[f64]) -> f64 {
+    pub fn eval_futhark_c(&self, x: InputMatrix) -> Vec<f64> {
         eval::futhark_c(self, x)
     }
 
     #[cfg(feature = "multicore")]
-    pub fn eval_futhark_multicore(&mut self, x: &[f64]) -> f64 {
+    pub fn eval_futhark_multicore(&self, x: InputMatrix) -> Vec<f64> {
         eval::futhark_multicore(self, x)
     }
 
     #[cfg(feature = "opencl")]
-    pub fn eval_futhark_opencl(&mut self, x: &[f64]) -> f64 {
+    pub fn eval_futhark_opencl(&self, x: InputMatrix) -> Vec<f64> {
         eval::futhark_opencl(self, x)
+    }
+
+    pub fn eval_coco_single(&self, x: &[f64]) -> f64 {
+        let x = InputMatrix::new(x, x.len());
+
+        self.eval_coco(x).pop().unwrap()
+    }
+
+    #[cfg(feature = "c")]
+    pub fn eval_futhark_c_single(&self, x: &[f64]) -> f64 {
+        let x = InputMatrix::new(x, x.len());
+
+        self.eval_futhark_c(x).pop().unwrap()
+    }
+
+    #[cfg(feature = "multicore")]
+    pub fn eval_futhark_multicore_single(&self, x: &[f64]) -> f64 {
+        let x = InputMatrix::new(x, x.len());
+
+        self.eval_futhark_multicore(x).pop().unwrap()
+    }
+
+    #[cfg(feature = "opencl")]
+    pub fn eval_futhark_opencl_single(&self, x: &[f64]) -> f64 {
+        let x = InputMatrix::new(x, x.len());
+
+        self.eval_futhark_opencl(x).pop().unwrap()
     }
 }

@@ -11,6 +11,10 @@ opencl = ["coco-accelerated/opencl"]
 name = "single_eval"
 harness = false
 
+[[bench]]
+name = "batch_eval"
+harness = false
+
 [dependencies.coco-reference]
 package = "coco-rs"
 version = "0.5.0"

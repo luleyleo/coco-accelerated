@@ -15,6 +15,11 @@ impl<'c> F64_1D<'c> {
         F64_1D { context, inner }
     }
 
+    pub unsafe fn from_raw(context: &'c Context, inner: *mut sys::futhark_f64_1d) -> Self {
+        assert!(!inner.is_null());
+        F64_1D { context, inner }
+    }
+
     pub fn shape(&self) -> &[usize] {
         unsafe {
             let shape = sys::futhark_shape_f64_1d(self.context.inner, self.inner);
@@ -26,6 +31,7 @@ impl<'c> F64_1D<'c> {
         out.reserve(self.shape()[0] - out.capacity());
         unsafe {
             sys::futhark_values_f64_1d(self.context.inner, self.inner, out.as_mut_ptr());
+            out.set_len(self.shape()[0]);
         }
     }
 }

@@ -12,7 +12,7 @@ fn source_dir() -> PathBuf {
 }
 
 fn source_file() -> PathBuf {
-    let source = source_dir().join("bbob.fut");
+    let source = source_dir().join("batch.fut");
 
     assert!(source.is_file(), "bbob.fut does not exist");
 

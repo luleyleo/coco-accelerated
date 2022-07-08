@@ -1,21 +1,21 @@
-use crate::{Context, Function, Problem};
+use crate::{matrix::InputMatrix, Context, Function, Problem};
 
 pub type EvalFn = fn(
     ctx: &Context,
-    x: &[f64],
+    x: InputMatrix,
     xopt: Vec<f64>,
     R: coco_legacy::Matrix,
     Q: coco_legacy::Matrix,
     function: Function,
     fopt: f64,
-) -> Option<f64>;
+) -> Option<Vec<f64>>;
 
-pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: &[f64]) -> f64 {
+pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: InputMatrix) -> Vec<f64> {
     let Problem {
         function, instance, ..
     } = *problem;
 
-    let dimension = x.len();
+    let dimension = x.dimension;
     let rseed: usize = function as usize + 10000 * instance;
     let rseed_3: usize = 3 + 10000 * instance;
     let rseed_17: usize = 17 + 10000 * instance;
@@ -27,7 +27,7 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: &[f64]) -> f64 {
         _ => rseed,
     };
 
-    let mut xopt = coco_legacy::compute_xopt(rseed, x.len());
+    let mut xopt = coco_legacy::compute_xopt(rseed, x.dimension);
     let fopt = coco_legacy::compute_fopt(function as usize, instance);
 
     // Special cases for some functions.
@@ -52,10 +52,10 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: &[f64]) -> f64 {
         }
         Function::BentCigar => {
             // No clue why they did this, probably it was a typo?
-            xopt = coco_legacy::compute_xopt(rseed + 1000000, x.len());
+            xopt = coco_legacy::compute_xopt(rseed + 1000000, x.inputs());
         }
         Function::Schwefel => {
-            xopt = coco_legacy::compute_unif(rseed, x.len());
+            xopt = coco_legacy::compute_unif(rseed, x.inputs());
             for xi in &mut xopt {
                 *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
             }

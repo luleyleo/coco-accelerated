@@ -83,8 +83,8 @@ fn bbob() {
         let result = runner.run(strategy, |x| {
             let problem = &mut Problem::new(context, function);
 
-            let cres = problem.eval_coco(&x);
-            let ares = problem.eval_futhark_c(&x);
+            let cres = problem.eval_coco_single(&x);
+            let ares = problem.eval_futhark_c_single(&x);
 
             check(cres, ares);
 

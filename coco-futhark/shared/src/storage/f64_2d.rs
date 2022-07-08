@@ -27,7 +27,7 @@ impl<'c> F64_2D<'c> {
     pub fn shape(&self) -> &[usize] {
         unsafe {
             let shape = sys::futhark_shape_f64_2d(self.context.inner, self.inner);
-            slice::from_raw_parts(shape as *const usize, 1)
+            slice::from_raw_parts(shape as *const usize, 2)
         }
     }
 
