@@ -7,6 +7,8 @@ edition = "2021"
 c = ["coco-accelerated/c"]
 multicore = ["coco-accelerated/multicore"]
 opencl = ["coco-accelerated/opencl"]
+reference = []
+default = ["reference"]
 
 [[bench]]
 name = "single_eval"
@@ -16,13 +18,8 @@ harness = false
 name = "batch_eval"
 harness = false
 
-[dependencies.coco-reference]
-package = "coco-rs"
-version = "0.5.0"
-
 [dependencies.coco-accelerated]
 path = "../coco-accelerated"
-features = ["c"]
 
 [dev-dependencies]
 criterion = "0.3.5"

@@ -33,6 +33,7 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
             b.iter(|| problem.eval_futhark_opencl_single(&input))
         });
 
+        #[cfg(feature = "reference")]
         group.bench_with_input(id("coco"), &dim, |b, _dim| {
             b.iter(|| problem.eval_coco_single(&input))
         });
