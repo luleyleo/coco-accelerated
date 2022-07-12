@@ -7,6 +7,7 @@ edition = "2021"
 c = ["coco-futhark-c"]
 multicore = ["coco-futhark-multicore"]
 opencl = ["coco-futhark-opencl"]
+cuda = ["coco-futhark-cuda"]
 default = ["c"]
 
 [dependencies]
@@ -17,6 +18,7 @@ coco-legacy = { path = "../coco-legacy" }
 coco-futhark-c = { path = "../coco-futhark/c", optional = true }
 coco-futhark-multicore = { path = "../coco-futhark/multicore", optional = true }
 coco-futhark-opencl = { path = "../coco-futhark/opencl", optional = true }
+coco-futhark-cuda = { path = "../coco-futhark/cuda", optional = true }
 
 [dev-dependencies]
 criterion = "0.3.5"

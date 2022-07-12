@@ -11,6 +11,9 @@ pub struct Context {
 
     #[cfg(feature = "opencl")]
     pub futhark_opencl: coco_futhark_opencl::Context,
+
+    #[cfg(feature = "cuda")]
+    pub futhark_cuda: coco_futhark_cuda::Context,
 }
 
 impl Context {
@@ -27,6 +30,9 @@ impl Context {
 
             #[cfg(feature = "opencl")]
             futhark_opencl: coco_futhark_opencl::Context::default(),
+
+            #[cfg(feature = "cuda")]
+            futhark_cuda: coco_futhark_cuda::Context::default(),
         }
     }
 }

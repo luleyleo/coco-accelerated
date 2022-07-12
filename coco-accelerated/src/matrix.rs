@@ -47,6 +47,14 @@ impl<'a> InputMatrix<'a> {
     ) -> coco_futhark_opencl::storage::F64_2D<'c> {
         coco_futhark_opencl::storage::F64_2D::new(context, self.data, self.dimension)
     }
+
+    #[cfg(feature = "cuda")]
+    pub fn allocate_futhark_cuda_array<'c>(
+        &self,
+        context: &'c coco_futhark_cuda::Context,
+    ) -> coco_futhark_cuda::storage::F64_2D<'c> {
+        coco_futhark_cuda::storage::F64_2D::new(context, self.data, self.dimension)
+    }
 }
 
 #[cfg(test)]

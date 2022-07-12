@@ -36,6 +36,11 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
             b.iter(|| problem.eval_futhark_opencl(input))
         });
 
+        #[cfg(feature = "cuda")]
+        group.bench_with_input(id("futhark_cuda"), &batch_size, |b, _dim| {
+            b.iter(|| problem.eval_futhark_cuda(input))
+        });
+
         #[cfg(feature = "reference")]
         group.bench_with_input(id("coco"), &batch_size, |b, _dim| {
             b.iter(|| problem.eval_coco(input))

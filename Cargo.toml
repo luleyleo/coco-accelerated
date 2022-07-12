@@ -7,5 +7,6 @@ members = [
     "coco-futhark/shared",
     "coco-futhark/c",
     "coco-futhark/multicore",
-    "coco-futhark/opencl"
+    "coco-futhark/opencl",
+    "coco-futhark/cuda"
 ]

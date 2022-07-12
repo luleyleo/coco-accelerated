@@ -58,6 +58,11 @@ impl<'c> Problem<'c> {
         eval::futhark_opencl(self, x)
     }
 
+    #[cfg(feature = "cuda")]
+    pub fn eval_futhark_cuda(&self, x: InputMatrix) -> Vec<f64> {
+        eval::futhark_cuda(self, x)
+    }
+
     pub fn eval_coco_single(&self, x: &[f64]) -> f64 {
         let x = InputMatrix::new(x, x.len());
 
@@ -83,5 +88,12 @@ impl<'c> Problem<'c> {
         let x = InputMatrix::new(x, x.len());
 
         self.eval_futhark_opencl(x).pop().unwrap()
+    }
+
+    #[cfg(feature = "cuda")]
+    pub fn eval_futhark_cuda_single(&self, x: &[f64]) -> f64 {
+        let x = InputMatrix::new(x, x.len());
+
+        self.eval_futhark_cuda(x).pop().unwrap()
     }
 }

@@ -49,6 +49,7 @@ pub fn build_target(compiler: &str) {
     }
 
     bindgen::Builder::default()
+        .clang_arg("-I/opt/cuda/include")
         .header(target.join("raw.h").to_string_lossy())
         .allowlist_function("free")
         .allowlist_function("futhark_.*")
@@ -61,6 +62,7 @@ pub fn build_target(compiler: &str) {
 
     cc::Build::new()
         .file(target.join("raw.c"))
+        .include("/opt/cuda/include")
         .warnings(false)
         .compile(&format!("coco-futhark-{compiler}"));
 }

@@ -15,3 +15,8 @@ pub use futhark_multicore::futhark_multicore;
 mod futhark_opencl;
 #[cfg(feature = "opencl")]
 pub use futhark_opencl::futhark_opencl;
+
+#[cfg(feature = "cuda")]
+mod futhark_cuda;
+#[cfg(feature = "cuda")]
+pub use futhark_cuda::futhark_cuda;

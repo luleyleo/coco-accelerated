@@ -7,6 +7,7 @@ edition = "2021"
 c = ["coco-accelerated/c"]
 multicore = ["coco-accelerated/multicore"]
 opencl = ["coco-accelerated/opencl"]
+cuda = ["coco-accelerated/cuda"]
 reference = []
 default = ["reference"]
 
