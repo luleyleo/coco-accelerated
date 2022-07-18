@@ -14,6 +14,7 @@ default = ["c"]
 coco = { version = "0.5.0", package = "coco-rs" }
 float_eq = "1.0.0"
 coco-legacy = { path = "../coco-legacy" }
+strum = { version = "0.24.1", features = ["derive"] }
 
 coco-futhark-c = { path = "../coco-futhark/c", optional = true }
 coco-futhark-multicore = { path = "../coco-futhark/multicore", optional = true }

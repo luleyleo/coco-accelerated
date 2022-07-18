@@ -1,16 +1,33 @@
-use coco_accelerated::{Context, Function, InputMatrix, Problem};
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use coco_accelerated::{Context, Function, InputMatrix, IntoEnumIterator, Problem};
+use criterion::{criterion_main, BenchmarkId, Criterion};
 use rand::prelude::*;
 
 const RAND_SEED: u64 = 0xdeadbeef;
 
-pub fn compare_function(c: &mut Criterion, function: Function) {
+pub fn functions_to_bench() -> Vec<Function> {
+    let only = &[Function::Sphere];
+
+    let skip = &[
+        Function::Gallagher1,
+        Function::Gallagher2,
+        Function::Katsuura,
+        Function::LunacekBiRastrigin,
+    ];
+
+    if only.is_empty() {
+        Function::iter().filter(|f| !skip.contains(f)).collect()
+    } else {
+        only.to_vec()
+    }
+}
+
+pub fn compare_function(c: &mut Criterion, function: Function, dimension: usize) {
     let context = &Context::new();
     let mut generator = rand::rngs::StdRng::seed_from_u64(RAND_SEED);
     let problem = Problem::new(context, function);
 
-    let mut group = c.benchmark_group(format!("{}-batch", function.name()));
-    for batch_size in [2, 10, 50, 100] {
+    let mut group = c.benchmark_group(format!("{}-d{}", function.name(), dimension));
+    for batch_size in [10, 25, 50, 100, 200] {
         let id = |name| BenchmarkId::new(name, batch_size);
         let dim = 20;
 
@@ -48,13 +65,12 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
     }
 }
 
-pub fn benchmark_sphere(c: &mut Criterion) {
-    compare_function(c, Function::Sphere);
+pub fn batch_eval_benches_d20() {
+    let mut criterion = Criterion::default().configure_from_args();
+
+    for function in functions_to_bench() {
+        compare_function(&mut criterion, function, 20);
+    }
 }
 
-pub fn benchmark_schaffers1(c: &mut Criterion) {
-    compare_function(c, Function::Schaffers1);
-}
-
-criterion_group!(batch_eval_benches, benchmark_sphere, benchmark_schaffers1);
-criterion_main!(batch_eval_benches);
+criterion_main!(batch_eval_benches_d20);

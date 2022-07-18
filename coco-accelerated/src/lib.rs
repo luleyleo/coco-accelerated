@@ -10,3 +10,5 @@ pub use crate::bbob::{Function, DIMENSIONS};
 pub use crate::context::Context;
 pub use crate::matrix::InputMatrix;
 pub use crate::problem::Problem;
+
+pub use strum::IntoEnumIterator;

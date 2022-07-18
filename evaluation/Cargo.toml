@@ -12,10 +12,6 @@ reference = []
 default = ["reference"]
 
 [[bench]]
-name = "single_eval"
-harness = false
-
-[[bench]]
 name = "batch_eval"
 harness = false
 

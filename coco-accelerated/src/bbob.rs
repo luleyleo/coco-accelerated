@@ -1,6 +1,8 @@
+use strum::{AsRefStr, EnumCount, EnumIter};
+
 pub static DIMENSIONS: &[usize] = &[2, 3, 5, 10, 20, 40];
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumCount, EnumIter, AsRefStr)]
 #[repr(usize)]
 pub enum Function {
     Sphere = 1,
@@ -30,43 +32,21 @@ pub enum Function {
 }
 
 impl Function {
-    pub fn name(&self) -> &'static str {
-        match self {
-            Function::Sphere => "sphere",
-            Function::Ellipsoid => "ellipsoid",
-            Function::Rastrigin => "rastrigin",
-            Function::BuecheRastrigin => "bueche_rastrigin",
-            Function::LinearSlope => "linear_slope",
-            Function::AttractiveSector => "attractive_sector",
-            Function::StepEllipsoid => "step_ellipsoid",
-            Function::Rosenbrock => "rosenbrock",
-            Function::RosenbrockRotated => "rosenbrock_rotated",
-            Function::EllipsoidRotated => "ellipsoid_rotated",
-            Function::Discus => "discus",
-            Function::BentCigar => "bent_cigar",
-            Function::SharpRidge => "sharp_ridge",
-            Function::DifferentPowers => "different_powers",
-            Function::RastriginRotated => "rastrigin_rotated",
-            Function::Weierstrass => "weierstrass",
-            Function::Schaffers1 => "schaffers1",
-            Function::Schaffers2 => "schaffers2",
-            Function::GriewankRosenbrock => "griewank_rosenbrock",
-            Function::Schwefel => "schwefel",
-            Function::Gallagher1 => "gallagher1",
-            Function::Gallagher2 => "gallagher2",
-            Function::Katsuura => "katsuura",
-            Function::LunacekBiRastrigin => "lunacek_bi_rastrigin",
-        }
+    pub fn name(&self) -> &str {
+        self.as_ref()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use strum::EnumCount;
+
     use crate::bbob::Function;
 
     #[test]
     fn numbers_match() {
+        assert_eq!(Function::COUNT, 24);
         assert_eq!(Function::Sphere as usize, 1);
-        assert_eq!(Function::LunacekBiRastrigin as usize, 24);
+        assert_eq!(Function::LunacekBiRastrigin as usize, Function::COUNT);
     }
 }
