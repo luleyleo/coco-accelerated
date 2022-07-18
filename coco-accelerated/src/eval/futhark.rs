@@ -76,6 +76,81 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: InputMatrix) -> Vec<f
     result.unwrap_or_else(|| panic!("Failed to evaluate {:?}", function))
 }
 
+#[macro_export]
+macro_rules! eval_futhark_using {
+    ($backend:ident, $ctx:ident, $x:ident, $xopt:ident, $R:ident, $Q:ident, $function:ident, $fopt:ident) => {{
+        use $backend::{functions, storage};
+
+        let ctx: &$backend::Context = $ctx;
+        let x: InputMatrix = $x;
+        let xopt: Vec<f64> = $xopt;
+        let R: coco_legacy::Matrix = $R;
+        let Q: coco_legacy::Matrix = $Q;
+        let function: Function = $function;
+        let fopt: f64 = $fopt;
+
+        let mut output = Vec::with_capacity(x.inputs());
+
+        let x = &storage::F64_2D::new(ctx, x.data, x.dimension);
+        let xopt = &storage::F64_1D::new(ctx, &xopt);
+        let R = &storage::F64_2D::new(ctx, &R.data, R.dimension);
+        let Q = &storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+
+        let success = match function {
+            Function::Sphere => functions::sphere_bbob(ctx, &mut output, x, xopt, fopt),
+            Function::Ellipsoid => functions::ellipsoidal_bbob(ctx, &mut output, x, xopt, fopt),
+            Function::Rastrigin => functions::rastrigin_bbob(ctx, &mut output, x, xopt, fopt),
+            Function::BuecheRastrigin => {
+                functions::bueche_rastrigin_bbob(ctx, &mut output, x, xopt, fopt)
+            }
+            Function::LinearSlope => functions::linear_slope_bbob(ctx, &mut output, x, xopt, fopt),
+            Function::AttractiveSector => {
+                functions::attractive_sector_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::StepEllipsoid => {
+                functions::step_ellipsoidal_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::Rosenbrock => functions::rosenbrock_bbob(ctx, &mut output, x, xopt, fopt),
+            Function::RosenbrockRotated => {
+                functions::rosenbrock_rotated_bbob(ctx, &mut output, x, fopt, Q)
+            }
+            Function::EllipsoidRotated => {
+                functions::ellipsoidal_rotated_bbob(ctx, &mut output, x, xopt, fopt, R)
+            }
+            Function::Discus => functions::discus_bbob(ctx, &mut output, x, xopt, fopt, R),
+            Function::BentCigar => functions::bent_cigar_bbob(ctx, &mut output, x, xopt, fopt, R),
+            Function::SharpRidge => {
+                functions::sharp_ridge_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::DifferentPowers => {
+                functions::different_powers_bbob(ctx, &mut output, x, xopt, fopt, R)
+            }
+            Function::RastriginRotated => {
+                functions::rastrigin_rotated_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::Weierstrass => {
+                functions::weierstrass_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::Schaffers1 => {
+                functions::schaffers_f7_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::Schaffers2 => {
+                functions::schaffers_f7_ill_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
+            }
+            Function::GriewankRosenbrock => {
+                functions::griewank_rosenbrock_bbob(ctx, &mut output, x, fopt, Q)
+            }
+            Function::Schwefel => functions::schwefel_bbob(ctx, &mut output, x, xopt, fopt),
+            Function::Gallagher1 => todo!(),
+            Function::Gallagher2 => todo!(),
+            Function::Katsuura => todo!(),
+            Function::LunacekBiRastrigin => todo!(),
+        };
+
+        success.then(|| output)
+    }};
+}
+
 fn needs_rotation(function: Function) -> (bool, bool) {
     match function {
         Function::Sphere => (false, false),
