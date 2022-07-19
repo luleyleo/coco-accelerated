@@ -20,7 +20,7 @@ impl<'c> Problem<'c> {
     }
 
     pub fn eval_coco(&self, x: InputMatrix) -> Vec<f64> {
-        assert!(DIMENSIONS.contains(&x.dimension));
+        assert!(DIMENSIONS.contains(&x.dimension()));
 
         let mut suite = self.context.coco.borrow_mut();
         let mut problem = suite
@@ -74,26 +74,5 @@ impl<'c> Problem<'c> {
         let x = InputMatrix::new(x, x.len());
 
         self.eval_futhark_c(x).pop().unwrap()
-    }
-
-    #[cfg(feature = "multicore")]
-    pub fn eval_futhark_multicore_single(&self, x: &[f64]) -> f64 {
-        let x = InputMatrix::new(x, x.len());
-
-        self.eval_futhark_multicore(x).pop().unwrap()
-    }
-
-    #[cfg(feature = "opencl")]
-    pub fn eval_futhark_opencl_single(&self, x: &[f64]) -> f64 {
-        let x = InputMatrix::new(x, x.len());
-
-        self.eval_futhark_opencl(x).pop().unwrap()
-    }
-
-    #[cfg(feature = "cuda")]
-    pub fn eval_futhark_cuda_single(&self, x: &[f64]) -> f64 {
-        let x = InputMatrix::new(x, x.len());
-
-        self.eval_futhark_cuda(x).pop().unwrap()
     }
 }

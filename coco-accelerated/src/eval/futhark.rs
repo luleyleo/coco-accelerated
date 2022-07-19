@@ -15,7 +15,7 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: InputMatrix) -> Vec<f
         function, instance, ..
     } = *problem;
 
-    let dimension = x.dimension;
+    let dimension = x.dimension();
     let rseed: usize = function as usize + 10000 * instance;
     let rseed_3: usize = 3 + 10000 * instance;
     let rseed_17: usize = 17 + 10000 * instance;
@@ -27,7 +27,7 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: InputMatrix) -> Vec<f
         _ => rseed,
     };
 
-    let mut xopt = coco_legacy::compute_xopt(rseed, x.dimension);
+    let mut xopt = coco_legacy::compute_xopt(rseed, dimension);
     let fopt = coco_legacy::compute_fopt(function as usize, instance);
 
     // Special cases for some functions.
@@ -52,10 +52,10 @@ pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: InputMatrix) -> Vec<f
         }
         Function::BentCigar => {
             // No clue why they did this, probably it was a typo?
-            xopt = coco_legacy::compute_xopt(rseed + 1000000, x.inputs());
+            xopt = coco_legacy::compute_xopt(rseed + 1000000, x.dimension());
         }
         Function::Schwefel => {
-            xopt = coco_legacy::compute_unif(rseed, x.inputs());
+            xopt = coco_legacy::compute_unif(rseed, x.dimension());
             for xi in &mut xopt {
                 *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
             }
@@ -91,7 +91,7 @@ macro_rules! eval_futhark_using {
 
         let mut output = Vec::with_capacity(x.inputs());
 
-        let x = &storage::F64_2D::new(ctx, x.data, x.dimension);
+        let x = &storage::F64_2D::new(ctx, x.data(), x.dimension());
         let xopt = &storage::F64_1D::new(ctx, &xopt);
         let R = &storage::F64_2D::new(ctx, &R.data, R.dimension);
         let Q = &storage::F64_2D::new(ctx, &Q.data, Q.dimension);

@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, Copy)]
 pub struct InputMatrix<'a> {
-    pub(crate) data: &'a [f64],
-    pub(crate) dimension: usize,
+    data: &'a [f64],
+    dimension: usize,
 }
 
 impl<'a> InputMatrix<'a> {
@@ -16,44 +16,16 @@ impl<'a> InputMatrix<'a> {
         self.dimension
     }
 
+    pub fn data(&self) -> &'a [f64] {
+        self.data
+    }
+
     pub fn inputs(&self) -> usize {
         self.data.len() / self.dimension
     }
 
     pub fn iter_inputs(&self) -> impl Iterator<Item = &[f64]> {
         (0..self.inputs()).map(|i| &self.data[(i * self.dimension)..((i + 1) * self.dimension)])
-    }
-
-    #[cfg(feature = "c")]
-    pub fn allocate_futhark_c_array<'c>(
-        &self,
-        context: &'c coco_futhark_c::Context,
-    ) -> coco_futhark_c::storage::F64_2D<'c> {
-        coco_futhark_c::storage::F64_2D::new(context, self.data, self.dimension)
-    }
-
-    #[cfg(feature = "multicore")]
-    pub fn allocate_futhark_multicore_array<'c>(
-        &self,
-        context: &'c coco_futhark_multicore::Context,
-    ) -> coco_futhark_multicore::storage::F64_2D<'c> {
-        coco_futhark_multicore::storage::F64_2D::new(context, self.data, self.dimension)
-    }
-
-    #[cfg(feature = "opencl")]
-    pub fn allocate_futhark_opencl_array<'c>(
-        &self,
-        context: &'c coco_futhark_opencl::Context,
-    ) -> coco_futhark_opencl::storage::F64_2D<'c> {
-        coco_futhark_opencl::storage::F64_2D::new(context, self.data, self.dimension)
-    }
-
-    #[cfg(feature = "cuda")]
-    pub fn allocate_futhark_cuda_array<'c>(
-        &self,
-        context: &'c coco_futhark_cuda::Context,
-    ) -> coco_futhark_cuda::storage::F64_2D<'c> {
-        coco_futhark_cuda::storage::F64_2D::new(context, self.data, self.dimension)
     }
 }
 
