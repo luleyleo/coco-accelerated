@@ -3,19 +3,19 @@ import "math"
 module raw = import "raw"
 module t = import "transform"
 
-entry sphere (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+def sphere (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     x
     |> t.shift xopt
     |> raw.sphere
     |> (+fopt)
 
-entry ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+def ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     x
     |> t.shift xopt |> t.x_osz
     |> raw.ellipsoidal
     |> (+fopt)
 
-entry rastrigin (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+def rastrigin (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     x
     |> t.shift xopt |> t.x_osz |> t.asy 0.2 |> t.A 10
     |> raw.rastrigin
@@ -26,14 +26,14 @@ local def bueche_rastrigin_s (x: []f64): []f64 =
     let s = map (\i -> if x[i] > 0 && (i % 2 == 0) then 10 else 1) (indices x) in
     map2 (*) s x
 
-entry bueche_rastrigin (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+def bueche_rastrigin (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     x
     |> t.shift xopt |> t.x_osz |> bueche_rastrigin_s |> t.A 10
     |> raw.rastrigin
     |> (+ 100 * (t.pen x))
     |> (+ fopt)
 
-entry linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+def linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     let z = map (\(xi, xopti) -> if xi * xopti < 25 then xi else xopti) (zip x xopt) in
     let s = t.A 100 (map sign' xopt) in
     zip s z
@@ -41,7 +41,7 @@ entry linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     |> f64.sum
     |> (+ fopt)
 
-entry attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate Q |> t.A 10 |> t.rotate R
     |> zip xopt |> map (\(xopti, xi) -> if xi * xopti > 0 then 100 * xi else xi)
@@ -55,7 +55,7 @@ local def step_ellipsoidal_round (zi: f64): f64 =
     then f64.floor(zi + 0.5)
     else f64.floor(zi * 10 + 0.5) / 10
 
-entry step_ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def step_ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     let z' = x |> t.shift xopt |> t.rotate R |> t.A 10 in
     let z = x |> t.shift xopt |> t.rotate Q |> t.A 10 |> map step_ellipsoidal_round |> t.rotate R in
     z
@@ -65,7 +65,7 @@ entry step_ellipsoidal (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][
     |> (+ fopt)
     |> (+ t.pen x)
 
-entry rosenbrock (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+def rosenbrock (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     x
     |> t.shift xopt
     |> map (* (f64.max 1 ((f64.sqrt (dim x)) / 8)))
@@ -73,7 +73,7 @@ entry rosenbrock (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     |> raw.rosenbrock
     |> (+ fopt)
 
-entry rosenbrock_rotated (x: []f64) (fopt: f64) (R: [][]f64): f64 =
+def rosenbrock_rotated (x: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.rotate R
     |> map (* (f64.max 1 ( (f64.sqrt (dim x)) / 8 )))
@@ -81,44 +81,44 @@ entry rosenbrock_rotated (x: []f64) (fopt: f64) (R: [][]f64): f64 =
     |> raw.rosenbrock
     |> (+ fopt)
 
-entry ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+def ellipsoidal_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R |> t.x_osz
     |> raw.ellipsoidal
     |> (+fopt)
 
-entry discus (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+def discus (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R |> t.x_osz
     |> raw.discus
     |> (+ fopt)
 
-entry bent_cigar (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+def bent_cigar (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate R
     |> raw.bent_cigar
     |> (+ fopt)
 
-entry sharp_ridge (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def sharp_ridge (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate Q |> t.A 10 |> t.rotate R
     |> raw.sharp_ridge
     |> (+ fopt)
 
-entry different_powers (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
+def different_powers (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R
     |> raw.different_powers
     |> (+ fopt)
 
-entry rastrigin_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def rastrigin_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R |> t.x_osz
     |> t.asy 0.2 |> t.rotate Q |> t.A 10 |> t.rotate R
     |> raw.rastrigin
     |> (+ fopt)
 
-entry weierstrass (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def weierstrass (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R
     |> t.x_osz |> t.rotate Q |> t.A 0.01 |> t.rotate R
@@ -126,21 +126,21 @@ entry weierstrass (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64)
     |> (+ (10 / dim x) * t.pen x)
     |> (+ fopt)
 
-entry schaffers_f7 (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def schaffers_f7 (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate Q |> t.A 10
     |> raw.schaffers_f7
     |> (+ 10 * t.pen x)
     |> (+ fopt)
 
-entry schaffers_f7_ill (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def schaffers_f7_ill (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R |> t.asy 0.5 |> t.rotate Q |> t.A 1000
     |> raw.schaffers_f7
     |> (+ 10 * t.pen x)
     |> (+ fopt)
 
-entry griewank_rosenbrock (x: []f64) (fopt: f64) (R: [][]f64): f64 =
+def griewank_rosenbrock (x: []f64) (fopt: f64) (R: [][]f64): f64 =
     x
     |> t.rotate R
     |> map (* (f64.max 1 ((f64.sqrt (dim x)) / 8)))
@@ -153,7 +153,7 @@ local def schwefel_z (x: *[]f64) (xopt: []f64): *[]f64 =
     loop acc = x for i in 1 ..< n do
         acc with [i] = acc[i] + 0.25 * (acc[i-1] - xopt[i-1])
 
-entry schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
+def schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
     let xopt = map (* 4.2096874633/2) xopt_sign in
     let x' = map (2 *) (map2 (*) xopt_sign x) in
     let xopt2 = xopt |> map f64.abs |> map (*2) in
