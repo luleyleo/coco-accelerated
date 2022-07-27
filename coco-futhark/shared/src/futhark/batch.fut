@@ -59,3 +59,6 @@ entry griewank_rosenbrock (x: [][]f64) (fopt: f64) (R: [][]f64): []f64 =
 
 entry schwefel (x: [][]f64) (xopt: []f64) (fopt: f64): []f64 =
     x |> map (\x -> bbob.schwefel x xopt fopt)
+
+entry gallagher_101me [b][d] (x: [b][d]f64) (y: [101][d]f64) (a: [d]f64) (fopt: f64) (R: [d][d]f64): [b]f64 =
+    x |> map (\x -> bbob.gallagher_101me x y a fopt R)

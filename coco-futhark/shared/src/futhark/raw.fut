@@ -98,8 +98,8 @@ def schwefel (x: []f64): f64 =
 
 -- f21: gallagher
 
-def gallagher [d] (x: [d]f64) (yi: f64) (Ci: [d]f64) (R: [d][d]f64) =
-    let dx = map ((-) yi) x in
+def gallagher [d] (x: [d]f64) (yi: []f64) (Ci: [d]f64) (R: [d][d]f64) =
+    let dx = map2 (-) x yi in
     dx
     |> mat'vec R
     |> map2 (*) Ci

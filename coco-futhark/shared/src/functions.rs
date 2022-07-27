@@ -337,3 +337,34 @@ pub fn schwefel_bbob(
 ) -> bool {
     run::bbob(ctx, sys::futhark_entry_schwefel, output, x, xopt, fopt)
 }
+
+pub fn gallagher(
+    ctx: &Context,
+    output: &mut Vec<f64>,
+    x: &F64_2D,
+    y: &F64_2D,
+    a: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+) -> bool {
+    let function = sys::futhark_entry_gallagher_101me;
+
+    let mut out: *mut sys::futhark_f64_1d = std::ptr::null_mut();
+
+    let status = unsafe {
+        (function)(
+            ctx.inner, &mut out, x.inner, y.inner, a.inner, fopt, R.inner,
+        ) == 0
+    };
+    let sync_status = ctx.sync();
+
+    if status && sync_status && !out.is_null() {
+        unsafe {
+            F64_1D::from_raw(ctx, out).values(output);
+        }
+
+        true
+    } else {
+        false
+    }
+}
