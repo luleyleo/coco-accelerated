@@ -95,3 +95,14 @@ def griewank_rosenbrock (x: []f64): f64 =
 
 def schwefel (x: []f64): f64 =
     - f64.sum (map (\xi -> xi * f64.sin (f64.sqrt (f64.abs (xi)))) x) / (100 * dim x) + 4.189828872724339
+
+-- f21: gallagher
+
+def gallagher [d] (x: [d]f64) (yi: f64) (Ci: [d]f64) (R: [d][d]f64) =
+    let dx = map ((-) yi) x in
+    dx
+    |> mat'vec R
+    |> map2 (*) Ci
+    |> mat'vec (transpose R)
+    |> map2 (*) dx
+    |> f64.sum
