@@ -1,181 +1,210 @@
-use crate::{matrix::InputMatrix, Context, Function, Problem};
+#[macro_export]
+macro_rules! declare_params {
+    ($backend:ident) => {
+        pub enum FParams<'c> {
+            Basic {
+                fopt: f64,
+                xopt: $backend::storage::F64_1D<'c>,
+            },
+            Rotated {
+                fopt: f64,
+                xopt: $backend::storage::F64_1D<'c>,
+                R: $backend::storage::F64_2D<'c>,
+            },
+            FixedRotated {
+                fopt: f64,
+                R: $backend::storage::F64_2D<'c>,
+            },
+            DoubleRotated {
+                fopt: f64,
+                xopt: $backend::storage::F64_1D<'c>,
+                R: $backend::storage::F64_2D<'c>,
+                Q: $backend::storage::F64_2D<'c>,
+            },
+            Gallagher {
+                fopt: f64,
+                peaks: usize,
+                y: $backend::storage::F64_2D<'c>,
+                a: $backend::storage::F64_1D<'c>,
+                R: $backend::storage::F64_2D<'c>,
+            },
+        }
 
-pub type EvalFn = fn(
-    ctx: &Context,
-    x: InputMatrix,
-    xopt: Vec<f64>,
-    R: coco_legacy::Matrix,
-    Q: coco_legacy::Matrix,
-    function: Function,
-    fopt: f64,
-) -> Option<Vec<f64>>;
+        impl<'c> FParams<'c> {
+            pub fn from<'a>(ctx: &'c $backend::Context, params: &$crate::Params) -> Self {
+                use $backend::storage;
+                use $crate::Params;
 
-pub fn eval_futhark(eval_fn: EvalFn, problem: &Problem, x: InputMatrix) -> Vec<f64> {
-    let Problem {
-        function, instance, ..
-    } = *problem;
+                match params {
+                    &Params::Basic { fopt, ref xopt } => {
+                        let xopt = storage::F64_1D::new(ctx, &xopt);
+                        FParams::Basic { fopt, xopt }
+                    }
+                    &Params::Rotated {
+                        fopt,
+                        ref xopt,
+                        ref R,
+                    } => {
+                        let xopt = storage::F64_1D::new(ctx, &xopt);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
+                        FParams::Rotated { fopt, xopt, R }
+                    }
+                    &Params::FixedRotated { fopt, ref R } => {
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
+                        FParams::FixedRotated { fopt, R }
+                    }
+                    &Params::DoubleRotated {
+                        fopt,
+                        ref xopt,
+                        ref R,
+                        ref Q,
+                    } => {
+                        let xopt = storage::F64_1D::new(ctx, &xopt);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
+                        let Q = storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+                        FParams::DoubleRotated { fopt, xopt, R, Q }
+                    }
+                    &Params::Gallagher {
+                        fopt,
+                        peaks,
+                        ref y,
+                        ref a,
+                        ref R,
+                    } => {
+                        assert!(peaks == 101 || peaks == 21);
+                        assert_eq!(peaks * R.dimension, y.len());
 
-    let dimension = x.dimension();
-    let rseed: usize = function as usize + 10000 * instance;
-    let rseed_3: usize = 3 + 10000 * instance;
-    let rseed_17: usize = 17 + 10000 * instance;
+                        let y = storage::F64_2D::new(ctx, &y, peaks);
+                        let a = storage::F64_1D::new(ctx, &a);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
 
-    // These (as well as bent_cigar) use a different rseed.
-    let rseed = match function {
-        Function::BuecheRastrigin => rseed_3,
-        Function::Schaffers2 => rseed_17,
-        _ => rseed,
+                        FParams::Gallagher {
+                            fopt,
+                            peaks,
+                            y,
+                            a,
+                            R,
+                        }
+                    }
+                }
+            }
+        }
     };
-
-    let mut xopt = coco_legacy::compute_xopt(rseed, dimension);
-    let fopt = coco_legacy::compute_fopt(function as usize, instance);
-
-    // Special cases for some functions.
-    match function {
-        Function::BuecheRastrigin => {
-            // OME: This step is in the legacy C code but _not_ in the function description.
-            for xi in xopt.iter_mut().step_by(2) {
-                *xi = xi.abs();
-            }
-        }
-        Function::LinearSlope => {
-            for xi in &mut xopt {
-                *xi = if *xi >= 0.0 { 5.0 } else { -5.0 };
-            }
-        }
-        Function::Rosenbrock => {
-            // According to the documentation, xopt should be within [-3, 3],
-            // but this is not enough to satisfy that condition...
-            for xi in &mut xopt {
-                *xi *= 0.75;
-            }
-        }
-        Function::BentCigar => {
-            // No clue why they did this, probably it was a typo?
-            xopt = coco_legacy::compute_xopt(rseed + 1000000, x.dimension());
-        }
-        Function::Schwefel => {
-            xopt = coco_legacy::compute_unif(rseed, x.dimension());
-            for xi in &mut xopt {
-                *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
-            }
-        }
-        _ => {}
-    }
-
-    let (nR, nQ) = needs_rotation(function);
-    let R = nR
-        .then(|| coco_legacy::compute_rotation(rseed + 1000000, dimension))
-        .unwrap_or_default();
-    let Q = nQ
-        .then(|| coco_legacy::compute_rotation(rseed, dimension))
-        .unwrap_or_default();
-
-    let result = eval_fn(problem.context, x, xopt, R, Q, function, fopt);
-
-    result.unwrap_or_else(|| panic!("Failed to evaluate {:?}", function))
 }
 
 #[macro_export]
-macro_rules! eval_futhark_using {
-    ($backend:ident, $ctx:ident, $x:ident, $xopt:ident, $R:ident, $Q:ident, $function:ident, $fopt:ident) => {{
-        use $backend::{functions, storage};
+macro_rules! declare_eval {
+    ($backend:ident) => {
+        fn eval(
+            ctx: &$backend::Context,
+            function: $crate::Function,
+            params: &FParams,
+            x: $crate::InputMatrix,
+        ) -> Option<Vec<f64>> {
+            use $backend::{functions, storage};
+            use $crate::Function;
 
-        let ctx: &$backend::Context = $ctx;
-        let x: InputMatrix = $x;
-        let xopt: Vec<f64> = $xopt;
-        let R: coco_legacy::Matrix = $R;
-        let Q: coco_legacy::Matrix = $Q;
-        let function: Function = $function;
-        let fopt: f64 = $fopt;
+            let mut output = Vec::with_capacity(x.inputs());
+            let x = &storage::F64_2D::new(ctx, x.data(), x.dimension());
 
-        let mut output = Vec::with_capacity(x.inputs());
+            let success = match (function, params) {
+                (Function::Sphere, FParams::Basic { fopt, xopt }) => {
+                    functions::sphere_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::Ellipsoid, FParams::Basic { fopt, xopt }) => {
+                    functions::ellipsoidal_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::Rastrigin, FParams::Basic { fopt, xopt }) => {
+                    functions::rastrigin_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::BuecheRastrigin, FParams::Basic { fopt, xopt }) => {
+                    functions::bueche_rastrigin_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::LinearSlope, FParams::Basic { fopt, xopt }) => {
+                    functions::linear_slope_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::AttractiveSector, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::attractive_sector_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::StepEllipsoid, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::step_ellipsoidal_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::Rosenbrock, FParams::Basic { fopt, xopt }) => {
+                    functions::rosenbrock_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::RosenbrockRotated, FParams::FixedRotated { fopt, R }) => {
+                    functions::rosenbrock_rotated_bbob(ctx, &mut output, x, *fopt, R)
+                }
+                (Function::EllipsoidRotated, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::ellipsoidal_rotated_bbob(ctx, &mut output, x, xopt, *fopt, R)
+                }
+                (Function::Discus, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::discus_bbob(ctx, &mut output, x, xopt, *fopt, R)
+                }
+                (Function::BentCigar, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::bent_cigar_bbob(ctx, &mut output, x, xopt, *fopt, R)
+                }
+                (Function::SharpRidge, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::sharp_ridge_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::DifferentPowers, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::different_powers_bbob(ctx, &mut output, x, xopt, *fopt, R)
+                }
+                (Function::RastriginRotated, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::rastrigin_rotated_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::Weierstrass, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::weierstrass_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::Schaffers1, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::schaffers_f7_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::Schaffers2, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::schaffers_f7_ill_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
+                (Function::GriewankRosenbrock, FParams::FixedRotated { fopt, R }) => {
+                    functions::griewank_rosenbrock_bbob(ctx, &mut output, x, *fopt, R)
+                }
+                (Function::Schwefel, FParams::Basic { fopt, xopt }) => {
+                    functions::schwefel_bbob(ctx, &mut output, x, xopt, *fopt)
+                }
+                (Function::Gallagher1, FParams::Basic { .. }) => todo!(),
+                (Function::Gallagher2, FParams::Basic { .. }) => todo!(),
+                (Function::Katsuura, FParams::Basic { .. }) => todo!(),
+                (Function::LunacekBiRastrigin, FParams::Basic { .. }) => todo!(),
+                _ => panic!("illegal (Function, Params) combination"),
+            };
 
-        let x = &storage::F64_2D::new(ctx, x.data(), x.dimension());
-        let xopt = &storage::F64_1D::new(ctx, &xopt);
-        let R = &storage::F64_2D::new(ctx, &R.data, R.dimension);
-        let Q = &storage::F64_2D::new(ctx, &Q.data, Q.dimension);
-
-        let success = match function {
-            Function::Sphere => functions::sphere_bbob(ctx, &mut output, x, xopt, fopt),
-            Function::Ellipsoid => functions::ellipsoidal_bbob(ctx, &mut output, x, xopt, fopt),
-            Function::Rastrigin => functions::rastrigin_bbob(ctx, &mut output, x, xopt, fopt),
-            Function::BuecheRastrigin => {
-                functions::bueche_rastrigin_bbob(ctx, &mut output, x, xopt, fopt)
-            }
-            Function::LinearSlope => functions::linear_slope_bbob(ctx, &mut output, x, xopt, fopt),
-            Function::AttractiveSector => {
-                functions::attractive_sector_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::StepEllipsoid => {
-                functions::step_ellipsoidal_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::Rosenbrock => functions::rosenbrock_bbob(ctx, &mut output, x, xopt, fopt),
-            Function::RosenbrockRotated => {
-                functions::rosenbrock_rotated_bbob(ctx, &mut output, x, fopt, Q)
-            }
-            Function::EllipsoidRotated => {
-                functions::ellipsoidal_rotated_bbob(ctx, &mut output, x, xopt, fopt, R)
-            }
-            Function::Discus => functions::discus_bbob(ctx, &mut output, x, xopt, fopt, R),
-            Function::BentCigar => functions::bent_cigar_bbob(ctx, &mut output, x, xopt, fopt, R),
-            Function::SharpRidge => {
-                functions::sharp_ridge_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::DifferentPowers => {
-                functions::different_powers_bbob(ctx, &mut output, x, xopt, fopt, R)
-            }
-            Function::RastriginRotated => {
-                functions::rastrigin_rotated_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::Weierstrass => {
-                functions::weierstrass_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::Schaffers1 => {
-                functions::schaffers_f7_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::Schaffers2 => {
-                functions::schaffers_f7_ill_bbob(ctx, &mut output, x, xopt, fopt, R, Q)
-            }
-            Function::GriewankRosenbrock => {
-                functions::griewank_rosenbrock_bbob(ctx, &mut output, x, fopt, Q)
-            }
-            Function::Schwefel => functions::schwefel_bbob(ctx, &mut output, x, xopt, fopt),
-            Function::Gallagher1 => todo!(),
-            Function::Gallagher2 => todo!(),
-            Function::Katsuura => todo!(),
-            Function::LunacekBiRastrigin => todo!(),
-        };
-
-        success.then(|| output)
-    }};
+            success.then(|| output)
+        }
+    };
 }
 
-fn needs_rotation(function: Function) -> (bool, bool) {
-    match function {
-        Function::Sphere => (false, false),
-        Function::Ellipsoid => (false, false),
-        Function::Rastrigin => (false, false),
-        Function::BuecheRastrigin => (false, false),
-        Function::LinearSlope => (false, false),
-        Function::AttractiveSector => (true, true),
-        Function::StepEllipsoid => (true, true),
-        Function::Rosenbrock => (false, false),
-        Function::RosenbrockRotated => (false, true),
-        Function::EllipsoidRotated => (true, false),
-        Function::Discus => (true, false),
-        Function::BentCigar => (true, false),
-        Function::SharpRidge => (true, true),
-        Function::DifferentPowers => (true, false),
-        Function::RastriginRotated => (true, true),
-        Function::Weierstrass => (true, true),
-        Function::Schaffers1 => (true, true),
-        Function::Schaffers2 => (true, true),
-        Function::GriewankRosenbrock => (false, true),
-        Function::Schwefel => (false, false),
-        Function::Gallagher1 => todo!(),
-        Function::Gallagher2 => todo!(),
-        Function::Katsuura => todo!(),
-        Function::LunacekBiRastrigin => todo!(),
-    }
+#[macro_export]
+macro_rules! declare_problem {
+    ($backend:ident) => {
+        pub struct Problem<'c> {
+            context: &'c $backend::Context,
+            function: $crate::Function,
+            params: FParams<'c>,
+        }
+
+        impl<'c> Problem<'c> {
+            pub fn new(
+                context: &'c $backend::Context,
+                function: $crate::Function,
+                params: FParams<'c>,
+            ) -> Self {
+                Problem {
+                    context,
+                    function,
+                    params,
+                }
+            }
+
+            pub fn evaluate(&self, x: $crate::InputMatrix) -> Option<Vec<f64>> {
+                eval(self.context, self.function, &self.params, x)
+            }
+        }
+    };
 }

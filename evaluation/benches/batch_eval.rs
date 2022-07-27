@@ -5,7 +5,7 @@ use rand::prelude::*;
 const RAND_SEED: u64 = 0xdeadbeef;
 
 pub fn functions_to_bench() -> Vec<Function> {
-    let only = &[Function::Sphere];
+    let only = &[Function::Sphere, Function::Schaffers1];
 
     let skip = &[
         Function::Gallagher1,
@@ -22,9 +22,9 @@ pub fn functions_to_bench() -> Vec<Function> {
 }
 
 pub fn compare_function(c: &mut Criterion, function: Function, dimension: usize) {
-    let context = &Context::new();
+    let context = &mut Context::new();
     let mut generator = rand::rngs::StdRng::seed_from_u64(RAND_SEED);
-    let problem = Problem::new(context, function);
+    let problem = &mut Problem::new(context, function, dimension);
 
     let mut group = c.benchmark_group(format!("{}-d{}", function.name(), dimension));
     for batch_size in [10, 25, 50, 100, 200] {

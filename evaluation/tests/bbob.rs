@@ -76,12 +76,12 @@ fn bbob() {
 
     let strategy = &x_strategy();
     let runner = &mut TestRunner::new(config);
-    let context = &mut Context::new();
     let mut failed = false;
 
     for &(function, check) in FUNCTIONS {
         let result = runner.run(strategy, |x| {
-            let problem = &mut Problem::new(context, function);
+            let context = &mut Context::new();
+            let problem = &mut Problem::new(context, function, x.len());
 
             let cres = problem.eval_coco_single(&x);
             let ares = problem.eval_futhark_c_single(&x);

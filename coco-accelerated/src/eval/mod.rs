@@ -1,22 +1,13 @@
 mod futhark;
-use futhark::eval_futhark;
 
 #[cfg(feature = "c")]
-mod futhark_c;
-#[cfg(feature = "c")]
-pub use futhark_c::futhark_c;
+pub mod futhark_c;
 
 #[cfg(feature = "multicore")]
-mod futhark_multicore;
-#[cfg(feature = "multicore")]
-pub use futhark_multicore::futhark_multicore;
+pub mod futhark_multicore;
 
 #[cfg(feature = "opencl")]
-mod futhark_opencl;
-#[cfg(feature = "opencl")]
-pub use futhark_opencl::futhark_opencl;
+pub mod futhark_opencl;
 
 #[cfg(feature = "cuda")]
-mod futhark_cuda;
-#[cfg(feature = "cuda")]
-pub use futhark_cuda::futhark_cuda;
+pub mod futhark_cuda;
