@@ -138,4 +138,11 @@ impl<'c> Problem<'c> {
 
         self.eval_futhark_c(x).pop().unwrap()
     }
+
+    #[cfg(feature = "opencl")]
+    pub fn eval_futhark_opencl_single(&mut self, x: &[f64]) -> f64 {
+        let x = InputMatrix::new(x, x.len());
+
+        self.eval_futhark_opencl(x).pop().unwrap()
+    }
 }
