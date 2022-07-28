@@ -17,6 +17,7 @@ harness = false
 
 [dependencies.coco-accelerated]
 path = "../coco-accelerated"
+default-features = false
 
 [dev-dependencies]
 criterion = "0.3.5"
