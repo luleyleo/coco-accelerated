@@ -46,11 +46,11 @@ macro_rules! declare_params {
                         ref R,
                     } => {
                         let xopt = storage::F64_1D::new(ctx, &xopt);
-                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
                         FParams::Rotated { fopt, xopt, R }
                     }
                     &Params::FixedRotated { fopt, ref R } => {
-                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
                         FParams::FixedRotated { fopt, R }
                     }
                     &Params::DoubleRotated {
@@ -60,8 +60,8 @@ macro_rules! declare_params {
                         ref Q,
                     } => {
                         let xopt = storage::F64_1D::new(ctx, &xopt);
-                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
-                        let Q = storage::F64_2D::new(ctx, &Q.data, Q.dimension);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
+                        let Q = storage::F64_2D::new(ctx, &Q.data, Q.dimension, Q.dimension);
                         FParams::DoubleRotated { fopt, xopt, R, Q }
                     }
                     &Params::Gallagher {
@@ -72,11 +72,11 @@ macro_rules! declare_params {
                         ref R,
                     } => {
                         assert!(peaks == 101 || peaks == 21);
-                        assert_eq!(peaks * R.dimension, y.len());
+                        assert_eq!(peaks * a.len(), y.len());
 
-                        let y = storage::F64_2D::new(ctx, &y, peaks);
+                        let y = storage::F64_2D::new(ctx, &y, peaks, a.len());
                         let a = storage::F64_1D::new(ctx, &a);
-                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension);
+                        let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
 
                         FParams::Gallagher {
                             fopt,
@@ -105,7 +105,7 @@ macro_rules! declare_eval {
             use $crate::Function;
 
             let mut output = Vec::with_capacity(x.inputs());
-            let x = &storage::F64_2D::new(ctx, x.data(), x.dimension());
+            let x = &storage::F64_2D::new(ctx, x.data(), x.inputs(), x.dimension());
 
             let success = match (function, params) {
                 (Function::Sphere, FParams::Basic { fopt, xopt }) => {

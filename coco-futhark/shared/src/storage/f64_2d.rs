@@ -7,10 +7,8 @@ pub struct F64_2D<'c> {
 }
 
 impl<'c> F64_2D<'c> {
-    pub fn new(context: &'c Context, data: &[f64], columns: usize) -> Self {
-        assert_eq!(data.len() % columns, 0);
-
-        let rows = data.len().checked_div(columns).unwrap_or(0);
+    pub fn new(context: &'c Context, data: &[f64], rows: usize, columns: usize) -> Self {
+        assert_eq!(rows * columns, data.len());
 
         let inner = unsafe {
             sys::futhark_new_f64_2d(
