@@ -37,6 +37,8 @@ impl<'c> F64_1D<'c> {
             sys::futhark_values_f64_1d(self.context.inner, self.inner, out.as_mut_ptr());
             out.set_len(self.shape()[0]);
         }
+
+        assert!(self.context.sync());
     }
 }
 

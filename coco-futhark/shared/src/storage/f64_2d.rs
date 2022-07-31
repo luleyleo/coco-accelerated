@@ -41,6 +41,8 @@ impl<'c> F64_2D<'c> {
             sys::futhark_values_f64_2d(self.context.inner, self.inner, out.as_mut_ptr());
             out.set_len(len);
         }
+
+        assert!(self.context.sync());
     }
 }
 
