@@ -7,9 +7,10 @@ pub struct F64_2D<'c> {
 }
 
 impl<'c> F64_2D<'c> {
-    pub fn new(context: &'c Context, data: &[f64], row_length: usize) -> Self {
-        let rows = data.len().checked_div(row_length).unwrap_or(0);
-        let columns = row_length;
+    pub fn new(context: &'c Context, data: &[f64], columns: usize) -> Self {
+        assert_eq!(data.len() % columns, 0);
+
+        let rows = data.len().checked_div(columns).unwrap_or(0);
 
         let inner = unsafe {
             sys::futhark_new_f64_2d(
@@ -32,9 +33,13 @@ impl<'c> F64_2D<'c> {
     }
 
     pub fn values(&self, out: &mut Vec<f64>) {
-        out.reserve(self.shape()[0] - out.capacity());
+        let s = self.shape();
+        let len = s[0] * s[1];
+
+        out.reserve(len - out.capacity());
         unsafe {
             sys::futhark_values_f64_2d(self.context.inner, self.inner, out.as_mut_ptr());
+            out.set_len(len);
         }
     }
 }
