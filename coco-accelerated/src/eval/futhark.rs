@@ -23,7 +23,6 @@ macro_rules! declare_params {
             },
             Gallagher {
                 fopt: f64,
-                peaks: usize,
                 y: $backend::storage::F64_2D<'c>,
                 a: $backend::storage::F64_1D<'c>,
                 R: $backend::storage::F64_2D<'c>,
@@ -79,13 +78,7 @@ macro_rules! declare_params {
                         let a = storage::F64_1D::new(ctx, &a);
                         let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
 
-                        FParams::Gallagher {
-                            fopt,
-                            peaks,
-                            y,
-                            a,
-                            R,
-                        }
+                        FParams::Gallagher { fopt, y, a, R }
                     }
                 }
             }
@@ -170,16 +163,9 @@ macro_rules! declare_eval {
                     functions::schwefel_bbob(ctx, &mut output, x, xopt, *fopt)
                 }
                 (
-                    Function::Gallagher1,
-                    FParams::Gallagher {
-                        peaks: _,
-                        y,
-                        a,
-                        fopt,
-                        R,
-                    },
+                    Function::Gallagher1 | Function::Gallagher2,
+                    FParams::Gallagher { y, a, fopt, R },
                 ) => functions::gallagher(ctx, &mut output, x, y, a, *fopt, R),
-                (Function::Gallagher2, FParams::Basic { .. }) => todo!(),
                 (Function::Katsuura, FParams::Basic { .. }) => todo!(),
                 (Function::LunacekBiRastrigin, FParams::Basic { .. }) => todo!(),
                 _ => panic!("illegal (Function, Params) combination"),

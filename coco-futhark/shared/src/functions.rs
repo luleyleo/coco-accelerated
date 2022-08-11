@@ -347,7 +347,7 @@ pub fn gallagher(
     fopt: f64,
     R: &F64_2D,
 ) -> bool {
-    let function = sys::futhark_entry_gallagher_101me;
+    let function = sys::futhark_entry_gallagher;
 
     let mut out: *mut sys::futhark_f64_1d = std::ptr::null_mut();
 

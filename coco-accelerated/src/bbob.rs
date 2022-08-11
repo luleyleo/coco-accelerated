@@ -151,10 +151,18 @@ impl Params {
                 Params::FixedRotated { fopt, R: Q }
             }
 
-            Function::Gallagher1 => {
+            Function::Gallagher1 | Function::Gallagher2 => {
                 let R = coco_legacy::compute_rotation(rseed, dimension);
 
-                let mut aperm = coco_legacy::compute_unif(rseed, 100)
+                let peaks = match function {
+                    Function::Gallagher1 => 101,
+                    Function::Gallagher2 => 21,
+                    _ => unreachable!(),
+                };
+
+                let adiv = (peaks - 2) as f64;
+
+                let mut aperm = coco_legacy::compute_unif(rseed, peaks - 1)
                     .into_iter()
                     .enumerate()
                     .collect::<Vec<_>>();
@@ -162,27 +170,31 @@ impl Params {
                 let mut a = aperm
                     .into_iter()
                     .map(|(i, _)| (i + 1) as f64)
-                    .map(|j| 1000f64.powf(2.0 * j / 99.0))
+                    .map(|j| 1000f64.powf(2.0 * j / adiv))
                     .collect::<Vec<_>>();
-                a.insert(0, 1000.0);
 
-                let mut y = coco_legacy::compute_unif(rseed, dimension * 101);
+                match function {
+                    Function::Gallagher1 => a.insert(0, 1000.0),
+                    Function::Gallagher2 => a.insert(0, 1000000.0),
+                    _ => unreachable!(),
+                }
+
+                let mut y = coco_legacy::compute_unif(rseed, dimension * peaks);
                 for i in 0..dimension {
                     y[i] = y[i] * 8.0 - 4.0;
                 }
-                for i in dimension..(dimension * 101) {
+                for i in dimension..(dimension * peaks) {
                     y[i] = y[i] * 10.0 - 5.0;
                 }
 
                 Params::Gallagher {
                     fopt,
-                    peaks: 101,
+                    peaks,
                     y,
                     a,
                     R,
                 }
             }
-            Function::Gallagher2 => todo!(),
             Function::Katsuura => todo!(),
             Function::LunacekBiRastrigin => todo!(),
         }
