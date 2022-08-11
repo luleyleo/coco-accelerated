@@ -73,6 +73,7 @@ macro_rules! declare_params {
                     } => {
                         assert!(peaks == 101 || peaks == 21);
                         assert_eq!(peaks * a.len(), y.len());
+                        assert_eq!(a.len(), R.dimension);
 
                         let y = storage::F64_2D::new(ctx, &y, peaks, a.len());
                         let a = storage::F64_1D::new(ctx, &a);
@@ -168,7 +169,16 @@ macro_rules! declare_eval {
                 (Function::Schwefel, FParams::Basic { fopt, xopt }) => {
                     functions::schwefel_bbob(ctx, &mut output, x, xopt, *fopt)
                 }
-                (Function::Gallagher1, FParams::Basic { .. }) => todo!(),
+                (
+                    Function::Gallagher1,
+                    FParams::Gallagher {
+                        peaks: _,
+                        y,
+                        a,
+                        fopt,
+                        R,
+                    },
+                ) => functions::gallagher(ctx, &mut output, x, y, a, *fopt, R),
                 (Function::Gallagher2, FParams::Basic { .. }) => todo!(),
                 (Function::Katsuura, FParams::Basic { .. }) => todo!(),
                 (Function::LunacekBiRastrigin, FParams::Basic { .. }) => todo!(),

@@ -1,4 +1,5 @@
 use coco_legacy::Matrix;
+use ordered_float::OrderedFloat;
 use strum::{AsRefStr, EnumCount, EnumIter};
 
 pub static DIMENSIONS: &[usize] = &[2, 3, 5, 10, 20, 40];
@@ -150,7 +151,37 @@ impl Params {
                 Params::FixedRotated { fopt, R: Q }
             }
 
-            Function::Gallagher1 => todo!(),
+            Function::Gallagher1 => {
+                let R = coco_legacy::compute_rotation(rseed, dimension);
+
+                let mut aperm = coco_legacy::compute_unif(rseed, 100)
+                    .into_iter()
+                    .enumerate()
+                    .collect::<Vec<_>>();
+                aperm.sort_unstable_by_key(|&(_, x)| OrderedFloat(x));
+                let mut a = aperm
+                    .into_iter()
+                    .map(|(i, _)| (i + 1) as f64)
+                    .map(|j| 1000f64.powf(2.0 * j / 99.0))
+                    .collect::<Vec<_>>();
+                a.insert(0, 1000.0);
+
+                let mut y = coco_legacy::compute_unif(rseed, dimension * 101);
+                for i in 0..dimension {
+                    y[i] = y[i] * 8.0 - 4.0;
+                }
+                for i in dimension..(dimension * 101) {
+                    y[i] = y[i] * 10.0 - 5.0;
+                }
+
+                Params::Gallagher {
+                    fopt,
+                    peaks: 101,
+                    y,
+                    a,
+                    R,
+                }
+            }
             Function::Gallagher2 => todo!(),
             Function::Katsuura => todo!(),
             Function::LunacekBiRastrigin => todo!(),

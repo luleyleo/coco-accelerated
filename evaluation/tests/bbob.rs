@@ -53,6 +53,7 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
         assert_float_eq!(c, a, abs <= 1e-11);
     }),
     //(Function::Schwefel, strict),
+    (Function::Gallagher1, strict),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {
