@@ -11,6 +11,7 @@ fn can_evaluate_coco() {
 }
 
 #[test]
+#[allow(unused_mut, unused_variables)]
 fn can_evaluate_futhark() {
     let context = &mut Context::default();
 
