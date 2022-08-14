@@ -140,7 +140,8 @@ impl Params {
             | Function::RastriginRotated
             | Function::Weierstrass
             | Function::Schaffers1
-            | Function::Schaffers2 => {
+            | Function::Schaffers2
+            | Function::Katsuura => {
                 let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
                 let Q = coco_legacy::compute_rotation(rseed, dimension);
                 Params::DoubleRotated { fopt, xopt, R, Q }
@@ -195,7 +196,6 @@ impl Params {
                     R,
                 }
             }
-            Function::Katsuura => todo!(),
             Function::LunacekBiRastrigin => todo!(),
         }
     }

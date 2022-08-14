@@ -174,3 +174,16 @@ def gallagher [p][d] (x: [d]f64) (y: [p][d]f64) (a: [d]f64) (fopt: f64) (R: [d][
     |> t.y_osz
     |> (+ t.pen x)
     |> (+ fopt)
+
+def katsuura [d] (x: [d]f64) (xopt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d]f64): f64 =
+    let factor = 10 / ((dim x) ** 2) in
+    x
+    |> map2 (subbed) xopt
+    |> mat'vec R
+    |> t.A 100
+    |> mat'vec Q
+    |> raw.katsuura
+    |> (* factor)
+    |> ((-) factor)
+    |> (+ t.pen x)
+    |> (+ fopt)

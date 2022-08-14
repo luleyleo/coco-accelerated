@@ -166,7 +166,9 @@ macro_rules! declare_eval {
                     Function::Gallagher1 | Function::Gallagher2,
                     FParams::Gallagher { y, a, fopt, R },
                 ) => functions::gallagher(ctx, &mut output, x, y, a, *fopt, R),
-                (Function::Katsuura, FParams::Basic { .. }) => todo!(),
+                (Function::Katsuura, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
+                    functions::katsuura(ctx, &mut output, x, xopt, *fopt, R, Q)
+                }
                 (Function::LunacekBiRastrigin, FParams::Basic { .. }) => todo!(),
                 _ => panic!("illegal (Function, Params) combination"),
             };

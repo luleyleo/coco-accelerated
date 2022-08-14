@@ -62,3 +62,6 @@ entry schwefel (x: [][]f64) (xopt: []f64) (fopt: f64): []f64 =
 
 entry gallagher [b][p][d] (x: [b][d]f64) (y: [p][d]f64) (a: [d]f64) (fopt: f64) (R: [d][d]f64): [b]f64 =
     x |> map (\x -> bbob.gallagher x y a fopt R)
+
+entry katsuura [b][d] (x: [b][d]f64) (xopt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d]f64): []f64 =
+    x |> map (\x -> bbob.katsuura x xopt fopt R Q)
