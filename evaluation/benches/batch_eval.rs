@@ -5,14 +5,8 @@ use rand::prelude::*;
 const RAND_SEED: u64 = 0xdeadbeef;
 
 pub fn functions_to_bench() -> Vec<Function> {
-    let only = &[Function::Sphere, Function::Schaffers1];
-
-    let skip = &[
-        Function::Gallagher1,
-        Function::Gallagher2,
-        Function::Katsuura,
-        Function::LunacekBiRastrigin,
-    ];
+    let only = &[];
+    let skip = &[];
 
     if only.is_empty() {
         Function::iter().filter(|f| !skip.contains(f)).collect()
