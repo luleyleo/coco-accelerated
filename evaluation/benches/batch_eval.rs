@@ -23,14 +23,13 @@ pub fn compare_function(c: &mut Criterion, function: Function, dimension: usize)
     let mut group = c.benchmark_group(format!("{}-d{}", function.name(), dimension));
     for batch_size in [10, 25, 50, 100, 200] {
         let id = |name| BenchmarkId::new(name, batch_size);
-        let dim = 20;
 
-        let data = (0..(dim * batch_size))
+        let data = (0..(dimension * batch_size))
             .into_iter()
             .map(|_| generator.gen_range(-5.0..=5.0))
             .collect::<Vec<f64>>();
 
-        let input = InputMatrix::new(&data, dim);
+        let input = InputMatrix::new(&data, dimension);
 
         #[cfg(feature = "c")]
         group.bench_with_input(id("futhark_c"), &batch_size, |b, _dim| {
