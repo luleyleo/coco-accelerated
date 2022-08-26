@@ -56,6 +56,7 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     //(Function::Gallagher1, strict),
     //(Function::Gallagher2, strict),
     //(Function::Katsuura, strict),
+    //(Function::LunacekBiRastrigin, strict),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

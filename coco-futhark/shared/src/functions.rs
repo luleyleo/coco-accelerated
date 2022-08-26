@@ -389,3 +389,15 @@ pub fn katsuura(
         Q,
     )
 }
+
+pub fn lunacek(
+    ctx: &Context,
+    output: &mut Vec<f64>,
+    x: &F64_2D,
+    xopt: &F64_1D,
+    fopt: f64,
+    R: &F64_2D,
+    Q: &F64_2D,
+) -> bool {
+    run::double_rotated_bbob(ctx, sys::futhark_entry_lunacek, output, x, xopt, fopt, R, Q)
+}

@@ -98,7 +98,7 @@ def schwefel (x: []f64): f64 =
 
 -- f21: gallagher
 
-def gallagher [d] (x: [d]f64) (yi: []f64) (Ci: [d]f64) (R: [d][d]f64) =
+def gallagher [d] (x: [d]f64) (yi: []f64) (Ci: [d]f64) (R: [d][d]f64): f64 =
     let dx = map2 (-) x yi in
     dx
     |> mat'vec R
@@ -109,12 +109,12 @@ def gallagher [d] (x: [d]f64) (yi: []f64) (Ci: [d]f64) (R: [d][d]f64) =
 
 -- f23: katsuura
 
-def katsuura_elem (xi: f64) =
+def katsuura_elem (xi: f64): f64 =
     let range = (1...32) |> map f64.i64 in
     let powers = range |> map (2**) in
     powers |> map (\p -> f64.abs ((p * xi) - (f64.round (p * xi))) / p) |> f64.sum
 
-def katsuura [d] (x: [d]f64) =
+def katsuura [d] (x: [d]f64): f64 =
     let power = 10 / ((dim x) ** 1.2) in
     let findices = indices x |> map (+1) |> map f64.i64 in
     x |> map katsuura_elem |> map2 (*) findices |> map (+1) |> f64.product |> (**power)

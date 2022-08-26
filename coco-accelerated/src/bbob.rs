@@ -108,7 +108,7 @@ impl Params {
                 // No clue why they did this, probably it was a typo?
                 xopt = coco_legacy::compute_xopt(rseed + 1000000, dimension);
             }
-            Function::Schwefel => {
+            Function::LunacekBiRastrigin | Function::Schwefel => {
                 xopt = coco_legacy::compute_unif(rseed, dimension);
                 for xi in &mut xopt {
                     *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
@@ -141,7 +141,8 @@ impl Params {
             | Function::Weierstrass
             | Function::Schaffers1
             | Function::Schaffers2
-            | Function::Katsuura => {
+            | Function::Katsuura
+            | Function::LunacekBiRastrigin => {
                 let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
                 let Q = coco_legacy::compute_rotation(rseed, dimension);
                 Params::DoubleRotated { fopt, xopt, R, Q }
@@ -196,7 +197,6 @@ impl Params {
                     R,
                 }
             }
-            Function::LunacekBiRastrigin => todo!(),
         }
     }
 }
