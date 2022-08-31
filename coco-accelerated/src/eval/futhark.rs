@@ -70,11 +70,18 @@ macro_rules! declare_params {
                         ref a,
                         ref R,
                     } => {
-                        assert!(peaks == 101 || peaks == 21);
-                        assert_eq!(peaks * a.len(), y.len());
-                        assert_eq!(a.len(), R.dimension);
+                        assert!(
+                            peaks == 101 || peaks == 21,
+                            "number of peaks must be 101 or 21"
+                        );
+                        assert_eq!(
+                            peaks * R.dimension,
+                            y.len(),
+                            "y must have length of dim * peaks"
+                        );
+                        assert_eq!(a.len(), peaks, "a must have length of peaks");
 
-                        let y = storage::F64_2D::new(ctx, &y, peaks, a.len());
+                        let y = storage::F64_2D::new(ctx, &y, peaks, R.dimension);
                         let a = storage::F64_1D::new(ctx, &a);
                         let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
 
