@@ -1,6 +1,6 @@
 use coco_accelerated::{Context, Function, InputMatrix, IntoEnumIterator, Problem};
-use criterion::{criterion_main, BenchmarkId, Criterion};
-use rand::prelude::*;
+use criterion::{criterion_main, BenchmarkId, Criterion, Throughput};
+use rand::{distributions, prelude::*};
 
 const RAND_SEED: u64 = 0xdeadbeef;
 
@@ -17,16 +17,17 @@ pub fn functions_to_bench() -> Vec<Function> {
 
 pub fn compare_function(c: &mut Criterion, function: Function, dimension: usize) {
     let context = &mut Context::new();
-    let mut generator = rand::rngs::StdRng::seed_from_u64(RAND_SEED);
+    let generator = &mut rand::rngs::StdRng::seed_from_u64(RAND_SEED);
     let problem = &mut Problem::new(context, function, dimension);
 
     let mut group = c.benchmark_group(format!("{}-d{}", function.name(), dimension));
     for batch_size in [10, 25, 50, 100, 200] {
         let id = |name| BenchmarkId::new(name, batch_size);
 
-        let data = (0..(dimension * batch_size))
-            .into_iter()
-            .map(|_| generator.gen_range(-5.0..=5.0))
+        group.throughput(Throughput::Elements(batch_size as u64));
+        let data = generator
+            .sample_iter(distributions::Uniform::new_inclusive(-5.0, 5.0))
+            .take(dimension * batch_size)
             .collect::<Vec<f64>>();
 
         let input = InputMatrix::new(&data, dimension);
