@@ -1,10 +1,20 @@
 use coco_legacy::Matrix;
 use ordered_float::OrderedFloat;
-use strum::{AsRefStr, EnumCount, EnumIter};
 
 pub static DIMENSIONS: &[usize] = &[2, 3, 5, 10, 20, 40];
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumCount, EnumIter, AsRefStr)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    strum::EnumCount,
+    strum::EnumIter,
+    strum::AsRefStr,
+    strum::Display,
+    strum::IntoStaticStr,
+)]
 #[repr(usize)]
 pub enum Function {
     Sphere = 1,
