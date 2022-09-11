@@ -1,4 +1,6 @@
 /target
 /Cargo.lock
 /reports
+
 /plotting/.venv
+__pycache__

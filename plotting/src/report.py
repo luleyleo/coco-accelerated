@@ -1,7 +1,5 @@
-from collections import defaultdict
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, List
-from datetime import datetime
+from typing import Any, Dict, List
 import cbor2
 
 
@@ -23,12 +21,12 @@ class Estimate:
 
     def __init__(self, obj: Dict[str, Any]) -> None:
         self.interval = ConfidenceInterval(obj['confidence_interval'])
-        self.point = obj['point']
-        self.std_error = obj['std_error']
+        self.point = obj['point_estimate']
+        self.std_error = obj['standard_error']
 
 
 class Measurements:
-    datetime: datetime
+    datetime: str
     iterations: List[float]
     values: List[float]
     avg_values: List[float]
@@ -36,22 +34,24 @@ class Measurements:
     estimates: Dict[str, Estimate]
 
     def __init__(self, obj: Dict[str, Any]) -> None:
-        self.datetime = datetime.fromisoformat(obj['datetime'])
+        self.datetime = str
         self.iterations = obj['iterations']
         self.values = obj['values']
         self.avg_values = obj['avg_values']
 
         self.estimates = dict()
         for name, estimate in obj['estimates'].items():
-            self.estimates[name] = Estimate(estimate)
+            if estimate != None:
+                self.estimates[name] = Estimate(estimate)
 
         self.throughput = obj['throughput']['Elements']
 
 
 class Benchmark:
-    group_id: str
-    function_id: str
+    function: str
+    target: str
     dimension: int
+    batch_size: int
 
     measurements: Measurements
 
@@ -59,46 +59,23 @@ class Benchmark:
         with open(path / 'benchmark.cbor', 'rb') as file:
             obj = cbor2.decoder.load(file)
 
-            self.group_id = obj['group_id']
-            self.function_id = obj['function_id']
-            self.dimension = int(obj['value_str'])
+            self.function = obj['id']['group_id']
+            self.target = obj['id']['function_id']
+
+            dimension, batch_size = obj['id']['value_str'].split('x')
+            self.dimension = int(dimension)
+            self.batch_size = int(batch_size)
 
             latest = obj['latest_record']
 
-        with open(path/ latest, 'rb') as file:
+        with open(path / latest, 'rb') as file:
             obj = cbor2.decoder.load(file)
             self.measurements = Measurements(obj)
 
 
-
-class Target:
-    dimensions: DefaultDict[int, Benchmark]
-
-    def __init__(self) -> None:
-        self.dimensions = defaultdict()
-
-
-class Function:
-    targets: DefaultDict[int, Target]
-
-    def __init__(self) -> None:
-        self.targets = defaultdict()
-
-
-class Report:
-    functions: DefaultDict[str, Function]
-
-    def __init__(self) -> None:
-        self.functions = defaultdict()
-
-
-def load_report(path: Path) -> Report:
+def load_report(path: Path) -> List[Benchmark]:
     base = path / 'data' / 'main'
     paths = base.glob('**/benchmark.cbor')
-    paths = (path.parent for path in paths)
-    benchmarks = [Benchmark(path) for path in paths]
+    benchmarks = [Benchmark(path.parent) for path in paths]
 
-    report = Report()
-    for benchmark in benchmarks:
-        report[benchmark.group_id][benchmark.function_id]
-
+    return benchmarks
