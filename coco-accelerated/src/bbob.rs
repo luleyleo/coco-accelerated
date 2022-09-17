@@ -93,7 +93,7 @@ fn precompute_matrix_multiplication_with_conditioning(
         for j in 0..dim {
             current_row[j] = 0.0;
             for k in 0..dim {
-                let base = 1.0 / f64::sqrt(conditioning);
+                let base = f64::sqrt(conditioning);
                 let exponent = k as f64 / (dim - 1) as f64;
                 current_row[j] += rot1[i][k] * f64::powf(base, exponent) * rot2[k][j];
             }
@@ -185,7 +185,7 @@ impl Params {
             Function::Weierstrass => {
                 let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
                 let Q = coco_legacy::compute_rotation(rseed, dimension);
-                let M = precompute_matrix_multiplication_with_conditioning(&R, &Q, 100.0);
+                let M = precompute_matrix_multiplication_with_conditioning(&R, &Q, 0.01);
                 Params::DoubleRotated {
                     fopt,
                     xopt,
