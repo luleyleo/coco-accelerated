@@ -145,8 +145,8 @@ macro_rules! declare_eval {
                 (Function::BentCigar, FParams::Rotated { fopt, xopt, R }) => {
                     functions::bent_cigar_bbob(ctx, &mut output, x, xopt, *fopt, R)
                 }
-                (Function::SharpRidge, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-                    functions::sharp_ridge_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                (Function::SharpRidge, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::sharp_ridge_bbob(ctx, &mut output, x, xopt, *fopt, R)
                 }
                 (Function::DifferentPowers, FParams::Rotated { fopt, xopt, R }) => {
                     functions::different_powers_bbob(ctx, &mut output, x, xopt, *fopt, R)

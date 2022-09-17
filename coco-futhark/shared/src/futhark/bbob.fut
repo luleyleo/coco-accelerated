@@ -99,9 +99,9 @@ def bent_cigar (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64): f64 =
     |> raw.bent_cigar
     |> (+ fopt)
 
-def sharp_ridge (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def sharp_ridge (x: []f64) (xopt: []f64) (fopt: f64) (M: [][]f64): f64 =
     x
-    |> t.shift xopt |> t.rotate Q |> t.A 10 |> t.rotate R
+    |> t.shift xopt |> t.rotate M
     |> raw.sharp_ridge
     |> (+ fopt)
 

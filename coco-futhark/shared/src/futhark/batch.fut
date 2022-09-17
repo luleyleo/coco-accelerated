@@ -36,8 +36,8 @@ entry discus (x: [][]f64) (xopt: []f64) (fopt: f64) (R: [][]f64): []f64 =
 entry bent_cigar (x: [][]f64) (xopt: []f64) (fopt: f64) (R: [][]f64): []f64 =
     x |> map (\x -> bbob.bent_cigar x xopt fopt R)
 
-entry sharp_ridge (x: [][]f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): []f64 =
-    x |> map (\x -> bbob.sharp_ridge x xopt fopt R Q)
+entry sharp_ridge (x: [][]f64) (xopt: []f64) (fopt: f64) (M: [][]f64): []f64 =
+    x |> map (\x -> bbob.sharp_ridge x xopt fopt M)
 
 entry different_powers (x: [][]f64) (xopt: []f64) (fopt: f64) (R: [][]f64): []f64 =
     x |> map (\x -> bbob.different_powers x xopt fopt R)

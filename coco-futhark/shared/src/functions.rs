@@ -185,18 +185,16 @@ pub fn sharp_ridge_bbob(
     x: &F64_2D,
     xopt: &F64_1D,
     fopt: f64,
-    R: &F64_2D,
-    Q: &F64_2D,
+    M: &F64_2D,
 ) -> bool {
-    run::double_rotated_bbob(
+    run::rotated_bbob(
         ctx,
         sys::futhark_entry_sharp_ridge,
         output,
         x,
         xopt,
         fopt,
-        R,
-        Q,
+        M,
     )
 }
 
