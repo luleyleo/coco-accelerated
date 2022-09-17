@@ -68,9 +68,8 @@ pub fn attractive_sector_bbob(
     xopt: &F64_1D,
     fopt: f64,
     R: &F64_2D,
-    Q: &F64_2D,
 ) -> bool {
-    run::double_rotated_bbob(
+    run::rotated_bbob(
         ctx,
         sys::futhark_entry_attractive_sector,
         output,
@@ -78,7 +77,6 @@ pub fn attractive_sector_bbob(
         xopt,
         fopt,
         R,
-        Q,
     )
 }
 

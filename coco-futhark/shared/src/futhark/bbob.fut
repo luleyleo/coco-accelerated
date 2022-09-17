@@ -41,9 +41,9 @@ def linear_slope (x: []f64) (xopt: []f64) (fopt: f64): f64 =
     |> f64.sum
     |> (+ fopt)
 
-def attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
+def attractive_sector (x: []f64) (xopt: []f64) (fopt: f64) (M: [][]f64): f64 =
     x
-    |> t.shift xopt |> t.rotate Q |> t.A 10 |> t.rotate R
+    |> t.shift xopt |> t.rotate M
     |> zip xopt |> map (\(xopti, xi) -> if xi * xopti > 0 then 100 * xi else xi)
     |> raw.sphere
     |> t.y_osz

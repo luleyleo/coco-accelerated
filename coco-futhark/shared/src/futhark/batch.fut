@@ -15,8 +15,8 @@ entry bueche_rastrigin (x: [][]f64) (xopt: []f64) (fopt: f64): []f64 =
 entry linear_slope (x: [][]f64) (xopt: []f64) (fopt: f64): []f64 =
     x |> map (\x -> bbob.linear_slope x xopt fopt)
 
-entry attractive_sector (x: [][]f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): []f64 =
-    x |> map (\x -> bbob.attractive_sector x xopt fopt R Q)
+entry attractive_sector (x: [][]f64) (xopt: []f64) (fopt: f64) (M: [][]f64): []f64 =
+    x |> map (\x -> bbob.attractive_sector x xopt fopt M)
 
 entry step_ellipsoidal (x: [][]f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): []f64 =
     x |> map (\x -> bbob.step_ellipsoidal x xopt fopt R Q)

@@ -169,8 +169,7 @@ impl Params {
                 Params::Rotated { fopt, xopt, R }
             }
 
-            Function::AttractiveSector
-            | Function::StepEllipsoid
+            Function::StepEllipsoid
             | Function::RastriginRotated
             | Function::Schaffers1
             | Function::Schaffers2
@@ -181,7 +180,7 @@ impl Params {
                 Params::DoubleRotated { fopt, xopt, R, Q }
             }
 
-            Function::SharpRidge => {
+            Function::AttractiveSector | Function::SharpRidge => {
                 let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
                 let Q = coco_legacy::compute_rotation(rseed, dimension);
                 let M = precompute_matrix_multiplication_with_conditioning(&R, &Q, 10.0);

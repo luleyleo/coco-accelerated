@@ -124,8 +124,8 @@ macro_rules! declare_eval {
                 (Function::LinearSlope, FParams::Basic { fopt, xopt }) => {
                     functions::linear_slope_bbob(ctx, &mut output, x, xopt, *fopt)
                 }
-                (Function::AttractiveSector, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-                    functions::attractive_sector_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+                (Function::AttractiveSector, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::attractive_sector_bbob(ctx, &mut output, x, xopt, *fopt, R)
                 }
                 (Function::StepEllipsoid, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
                     functions::step_ellipsoidal_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
