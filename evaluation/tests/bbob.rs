@@ -42,7 +42,9 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::SharpRidge, strict),
     (Function::DifferentPowers, strict),
     (Function::RastriginRotated, strict),
-    //(Function::Weierstrass, strict),
+    (Function::Weierstrass, |c, a| {
+        assert_float_eq!(c, a, abs <= 1e-11);
+    }),
     (Function::Schaffers1, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-13);
     }),
