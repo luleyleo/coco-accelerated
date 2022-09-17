@@ -61,12 +61,13 @@ def different_powers (x: []f64): f64 =
 
 -- f16: weierstrass
 
-def weierstrass_factor (xi: f64) (k: f64): f64 =
-    (1 / 2**k) * f64.cos (2 * f64.pi * (3**k) * (xi + 0.5))
+def weierstrass_factor (xi: f64) (k2: f64) (k3: f64): f64 =
+    (1 / k2) * f64.cos (2 * f64.pi * (k3) * (xi + 0.5))
 
 def weierstrass_sum (xi: f64): f64 =
-    let k = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] in
-    f64.sum (map (weierstrass_factor xi) k)
+    let k2 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |> map (2**) in
+    let k3 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] |> map (3**) in
+    f64.sum (map (\i -> weierstrass_factor xi k2[i] k3[i]) (indices k2))
 
 def weierstrass_f0: f64 =
     weierstrass_sum 0
