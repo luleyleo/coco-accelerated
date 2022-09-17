@@ -3,12 +3,42 @@
 //! This reuses the C legacy code to guarantee the same behaviour
 //! as the official coco benchmark suite.
 
+use std::ops::{Index, IndexMut};
+
 type CocoMatrix = *const *mut f64;
 
 #[derive(Default, Debug)]
 pub struct Matrix {
     pub dimension: usize,
     pub data: Box<[f64]>,
+}
+
+impl Matrix {
+    pub fn new(dimension: usize) -> Self {
+        let data = vec![0.0; dimension * dimension].into_boxed_slice();
+
+        Matrix { dimension, data }
+    }
+}
+
+impl Index<usize> for Matrix {
+    type Output = [f64];
+
+    fn index(&self, index: usize) -> &Self::Output {
+        let start = index * self.dimension;
+        let end = start + self.dimension;
+
+        &self.data[start..end]
+    }
+}
+
+impl IndexMut<usize> for Matrix {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        let start = index * self.dimension;
+        let end = start + self.dimension;
+
+        &mut self.data[start..end]
+    }
 }
 
 extern "C" {

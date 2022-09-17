@@ -78,6 +78,31 @@ pub enum Params {
     },
 }
 
+fn precompute_matrix_multiplication_with_conditioning(
+    rot1: &Matrix,
+    rot2: &Matrix,
+    conditioning: f64,
+) -> Matrix {
+    assert_eq!(rot1.dimension, rot2.dimension);
+
+    let dim = rot1.dimension;
+    let mut m = Matrix::new(dim);
+
+    for i in 0..dim {
+        let current_row = &mut m[i];
+        for j in 0..dim {
+            current_row[j] = 0.0;
+            for k in 0..dim {
+                let base = 1.0 / f64::sqrt(conditioning);
+                let exponent = k as f64 / (dim - 1) as f64;
+                current_row[j] += rot1[i][k] * f64::powf(base, exponent) * rot2[k][j];
+            }
+        }
+    }
+
+    m
+}
+
 impl Params {
     pub fn from(function: Function, dimension: usize, instance: usize) -> Self {
         let rseed: usize = function as usize + 10000 * instance;
@@ -148,7 +173,6 @@ impl Params {
             | Function::StepEllipsoid
             | Function::SharpRidge
             | Function::RastriginRotated
-            | Function::Weierstrass
             | Function::Schaffers1
             | Function::Schaffers2
             | Function::Katsuura
@@ -156,6 +180,18 @@ impl Params {
                 let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
                 let Q = coco_legacy::compute_rotation(rseed, dimension);
                 Params::DoubleRotated { fopt, xopt, R, Q }
+            }
+
+            Function::Weierstrass => {
+                let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
+                let Q = coco_legacy::compute_rotation(rseed, dimension);
+                let M = precompute_matrix_multiplication_with_conditioning(&R, &Q, 100.0);
+                Params::DoubleRotated {
+                    fopt,
+                    xopt,
+                    R,
+                    Q: M,
+                }
             }
 
             Function::RosenbrockRotated | Function::GriewankRosenbrock => {

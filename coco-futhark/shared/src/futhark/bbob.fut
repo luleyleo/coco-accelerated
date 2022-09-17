@@ -121,7 +121,7 @@ def rastrigin_rotated (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]
 def weierstrass (x: []f64) (xopt: []f64) (fopt: f64) (R: [][]f64) (Q: [][]f64): f64 =
     x
     |> t.shift xopt |> t.rotate R
-    |> t.x_osz |> t.rotate Q |> t.A 0.01 |> t.rotate R
+    |> t.x_osz |> t.rotate Q
     |> raw.weierstrass
     |> (+ (10 / dim x) * t.pen x)
     |> (+ fopt)
