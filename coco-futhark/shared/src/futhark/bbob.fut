@@ -166,9 +166,9 @@ def schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
 
 def gallagher [p][d] (x: [d]f64) (y: [p][d]f64) (a: [p]f64) (fopt: f64) (R: [d][d]f64): f64 =
     let div = f64.i64 p - 2 in
-    let c = a |> map (\ai -> (t.A ai (replicate d 1)) |> map (/ ai**0.25)) in
-    let w = ((indices a) |> map f64.i64 |> map (\i -> 1.1 + 8 * (i - 1) / div)) with [0] = 10 in
-    let e = (indices a) |> map (\i -> w[i] * f64.exp ((-1 / 2 * (dim x) * (raw.gallagher x y[i] c[i] R)) ** 2)) in
+    let c: [p][d]f64 = a |> map (\ai -> (t.A ai (replicate d 1)) |> map (/ ai**0.25)) in
+    let w: [p]f64 = ((iota p) |> map f64.i64 |> map (\i -> 1.1 + 8 * (i - 1) / div)) with [0] = 10 in
+    let e: [p]f64 = (iota p) |> map (\i -> w[i] * f64.exp (-1 / (2 * (dim x)) * (raw.gallagher x y[i] c[i] R))) in
 
     (10 - f64.maximum e) ** 2
     |> t.y_osz
