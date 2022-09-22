@@ -74,6 +74,8 @@ pub enum Params {
         peaks: usize,
         y: Vec<f64>,
         a: Vec<f64>,
+        w: Vec<f64>,
+        c: Vec<f64>,
         R: Matrix,
     },
 }
@@ -223,14 +225,21 @@ impl Params {
                 let mut a = aperm
                     .into_iter()
                     .map(|(i, _)| (i + 1) as f64)
-                    .map(|j| 1000f64.powf(2.0 * j / adiv))
+                    .map(|j| 1000000f64.powf(j / adiv))
                     .collect::<Vec<_>>();
 
                 match function {
-                    Function::Gallagher1 => a.insert(0, 1000.0),
-                    Function::Gallagher2 => a.insert(0, 1000000.0),
+                    Function::Gallagher1 => a.insert(0, 1000.0), // might be 100
+                    Function::Gallagher2 => a.insert(0, 1000000.0), // might be 1000
                     _ => unreachable!(),
                 }
+
+                let mut w = (0..peaks)
+                    .into_iter()
+                    .map(|i| i as f64)
+                    .map(|i| 1.1 + 8.0 * (i - 1.0) / adiv)
+                    .collect::<Vec<_>>();
+                w[0] = 10.0;
 
                 let mut y = coco_legacy::compute_unif(rseed, dimension * peaks);
                 for i in 0..dimension {
@@ -240,11 +249,15 @@ impl Params {
                     y[i] = y[i] * 10.0 - 5.0;
                 }
 
+                let mut c = vec![1.0; dimension * peaks];
+
                 Params::Gallagher {
                     fopt,
                     peaks,
                     y,
                     a,
+                    w,
+                    c,
                     R,
                 }
             }
