@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, List
 import cbor2
+import pandas as pnd
 
 
 class ConfidenceInterval:
@@ -79,3 +80,25 @@ def load_report(path: Path) -> List[Benchmark]:
     benchmarks = [Benchmark(path.parent) for path in paths]
 
     return benchmarks
+
+
+def make_report_data_frame(benchmarks: List[Benchmark]) -> pnd.DataFrame:
+    targets = [b.target for b in benchmarks]
+    functions = [b.function for b in benchmarks]
+    dimensions = [b.dimension for b in benchmarks]
+    batch_sizes = [b.batch_size for b in benchmarks]
+    medians = [b.measurements.estimates['median'].point for b in benchmarks]
+    means = [b.measurements.estimates['mean'].point for b in benchmarks]
+
+    return pnd.DataFrame({
+        'target': targets,
+        'function': functions,
+        'dimension': dimensions,
+        'batch_size': batch_sizes,
+        'median': medians,
+        'mean': means,
+    })
+
+
+def load_report_data_frame(path: Path) -> pnd.DataFrame:
+    return make_report_data_frame(load_report(path))

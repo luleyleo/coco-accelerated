@@ -3,4 +3,5 @@
 /reports
 
 /plotting/.venv
+/plotting/plots
 __pycache__
