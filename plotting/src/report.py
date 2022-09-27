@@ -89,6 +89,7 @@ def make_report_data_frame(benchmarks: List[Benchmark]) -> pnd.DataFrame:
     batch_sizes = [b.batch_size for b in benchmarks]
     medians = [b.measurements.estimates['median'].point for b in benchmarks]
     means = [b.measurements.estimates['mean'].point for b in benchmarks]
+    std_dev = [b.measurements.estimates['std_dev'].point for b in benchmarks]
 
     return pnd.DataFrame({
         'target': targets,
@@ -97,6 +98,7 @@ def make_report_data_frame(benchmarks: List[Benchmark]) -> pnd.DataFrame:
         'batch_size': batch_sizes,
         'median': medians,
         'mean': means,
+        'std_dev': std_dev,
     })
 
 
