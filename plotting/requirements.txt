@@ -1,4 +1,0 @@
-numpy==1.23.2
-matplotlib==3.5.3
-seaborn==0.12.0
-cbor2==5.4.3
