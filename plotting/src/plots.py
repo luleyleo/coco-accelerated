@@ -1,4 +1,3 @@
-from pathlib import Path
 from matplotlib.figure import Figure
 
 import seaborn as sbn
@@ -31,44 +30,24 @@ def batch_scaling(report: pnd.DataFrame) -> Figure:
     return sbn.relplot(data=report, kind='line', x='batch_size', y='median_n', hue='target', row='function', col='dimension')
 
 
-def aggregation(report: pnd.DataFrame) -> Figure:
+def aggregation(report: pnd.DataFrame, dimension = 40) -> Figure:
     data = report.groupby(by=['dimension', 'batch_size', 'target']).aggregate({'median': 'mean'}).reset_index()
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 7))
-
-    ax[0].set_title('dimension 2')
-    sbn.barplot(data[data['dimension'] == 2], x='batch_size', y='median', hue='target', ax=ax[0])
-
-    ax[1].set_title('dimension 40')
-    sbn.barplot(data[data['dimension'] == 40], x='batch_size', y='median', hue='target', ax=ax[1])
-
-    return fig
+    return sbn.barplot(data[data['dimension'] == dimension], x='batch_size', y='median', hue='target')
 
 
-def deviation_by_batch_size(report: pnd.DataFrame) -> Figure:
+def deviation_by_batch_size(report: pnd.DataFrame, dimension = 40) -> Figure:
     data = report.groupby(by=['dimension', 'batch_size', 'target']).aggregate({'std_dev': 'mean'}).reset_index()
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 7))
-
-    ax[0].set_title('dimension 2')
-    sbn.barplot(data[data['dimension'] == 2], x='batch_size', y='std_dev', hue='target', ax=ax[0])
-
-    ax[1].set_title('dimension 40')
-    sbn.barplot(data[data['dimension'] == 40], x='batch_size', y='std_dev', hue='target', ax=ax[1])
-
-    return fig
+    return sbn.barplot(data[data['dimension'] == dimension], x='batch_size', y='std_dev', hue='target')
 
 
-def deviation_by_function(report: pnd.DataFrame) -> Figure:
+def deviation_by_function(report: pnd.DataFrame, dimension = 40) -> Figure:
     data = report.groupby(by=['dimension', 'target', 'function']).aggregate({'std_dev': 'mean'}).reset_index()
 
-    fig, ax = plt.subplots(1, 2, figsize=(26, 12))
-
-    ax[0].set_title('dimension 2')
-    sbn.barplot(data[data['dimension'] == 2], x='std_dev', y='function', hue='target', ax=ax[0])
-
-    ax[1].set_title('dimension 40')
-    sbn.barplot(data[data['dimension'] == 40], x='std_dev', y='function', hue='target', ax=ax[1])
+    sbn.set(rc={"figure.figsize":(6, 8)})
+    fig = sbn.barplot(data[data['dimension'] == dimension], x='std_dev', y='function', hue='target')
+    sbn.set()
 
     return fig
 
