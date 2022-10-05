@@ -30,6 +30,16 @@ macro_rules! declare_params {
         }
 
         impl<'c> FParams<'c> {
+            pub fn fopt(&self) -> f64 {
+                *match self {
+                    FParams::Basic { fopt, .. } => fopt,
+                    FParams::Rotated { fopt, .. } => fopt,
+                    FParams::FixedRotated { fopt, .. } => fopt,
+                    FParams::DoubleRotated { fopt, .. } => fopt,
+                    FParams::Gallagher { fopt, .. } => fopt,
+                }
+            }
+
             pub fn from<'a>(ctx: &'c $backend::Context, params: &$crate::Params) -> Self {
                 use $backend::storage;
                 use $crate::Params;
@@ -207,6 +217,10 @@ macro_rules! declare_problem {
                     function,
                     params,
                 }
+            }
+
+            pub fn target_hit(&self, value: f64) -> bool {
+                value <= self.params.fopt() + 1e-8
             }
 
             pub fn evaluate(&self, x: $crate::InputMatrix) -> Option<Vec<f64>> {

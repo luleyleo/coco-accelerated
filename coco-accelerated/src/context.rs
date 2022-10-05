@@ -1,4 +1,5 @@
 pub struct Context {
+    #[cfg(feature = "reference")]
     pub coco: coco::Suite,
 
     #[cfg(feature = "c")]
@@ -16,10 +17,9 @@ pub struct Context {
 
 impl Context {
     pub fn new() -> Self {
-        let coco = coco::Suite::new(coco::SuiteName::Bbob, "", "").unwrap();
-
         Context {
-            coco,
+            #[cfg(feature = "reference")]
+            coco: coco::Suite::new(coco::SuiteName::Bbob, "", "").unwrap(),
 
             #[cfg(feature = "c")]
             coco_futhark_c: coco_futhark_c::Context::default(),

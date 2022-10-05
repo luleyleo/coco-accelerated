@@ -1,3 +1,5 @@
+#![allow(clippy::needless_range_loop)]
+
 use coco_legacy::Matrix;
 use ordered_float::OrderedFloat;
 
@@ -14,6 +16,7 @@ pub static DIMENSIONS: &[usize] = &[2, 3, 5, 10, 20, 40];
     strum::AsRefStr,
     strum::Display,
     strum::IntoStaticStr,
+    strum::FromRepr,
 )]
 #[repr(usize)]
 pub enum Function {
@@ -76,6 +79,18 @@ pub enum Params {
         a: Vec<f64>,
         R: Matrix,
     },
+}
+
+impl Params {
+    pub fn fopt(&self) -> f64 {
+        *match self {
+            Params::Basic { fopt, .. } => fopt,
+            Params::Rotated { fopt, .. } => fopt,
+            Params::FixedRotated { fopt, .. } => fopt,
+            Params::DoubleRotated { fopt, .. } => fopt,
+            Params::Gallagher { fopt, .. } => fopt,
+        }
+    }
 }
 
 fn precompute_matrix_multiplication_with_conditioning(

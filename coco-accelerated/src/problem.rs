@@ -1,8 +1,9 @@
-use crate::{eval, Context, Function, InputMatrix, Params, DIMENSIONS};
+use crate::{eval, Context, Function, InputMatrix, Params};
 
 pub struct Problem<'c> {
     pub(crate) dimension: usize,
 
+    #[cfg(feature = "reference")]
     pub(crate) instance_reference: coco::Problem<'c>,
 
     #[cfg(feature = "c")]
@@ -31,6 +32,7 @@ impl<'c> Problem<'c> {
     ) -> Self {
         let params = Params::from(function, dimension, instance);
 
+        #[cfg(feature = "reference")]
         let instance_reference = context
             .coco
             .problem_by_function_dimension_instance(function as usize, dimension, instance)
@@ -66,6 +68,8 @@ impl<'c> Problem<'c> {
 
         Problem {
             dimension,
+
+            #[cfg(feature = "reference")]
             instance_reference,
 
             #[cfg(feature = "c")]
@@ -82,8 +86,19 @@ impl<'c> Problem<'c> {
         }
     }
 
+    #[allow(unused_variables)]
+    #[cfg(any(feature = "reference", feature = "c"))]
+    pub fn target_hit(&self, value: f64) -> bool {
+        #[cfg(feature = "reference")]
+        return self.instance_reference.final_target_hit();
+
+        #[cfg(not(feature = "reference"))]
+        return self.instance_c.target_hit(value);
+    }
+
+    #[cfg(feature = "reference")]
     pub fn eval_coco(&mut self, x: InputMatrix) -> Vec<f64> {
-        assert!(DIMENSIONS.contains(&x.dimension()));
+        assert!(crate::DIMENSIONS.contains(&x.dimension()));
         assert_eq!(self.dimension, x.dimension());
 
         let mut output = Vec::with_capacity(x.inputs());
@@ -126,6 +141,7 @@ impl<'c> Problem<'c> {
         self.instance_cuda.evaluate(x).unwrap()
     }
 
+    #[cfg(feature = "reference")]
     pub fn eval_coco_single(&mut self, x: &[f64]) -> f64 {
         let x = InputMatrix::new(x, x.len());
 
