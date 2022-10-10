@@ -5,6 +5,10 @@ pub struct Context {
     pub(crate) inner: *mut sys::futhark_context,
 }
 
+// TODO: figure out if this is okay
+unsafe impl Send for Context {}
+unsafe impl Sync for Context {}
+
 impl Context {
     pub fn new(config: Config) -> Self {
         let inner = unsafe { sys::futhark_context_new(config.inner) };
