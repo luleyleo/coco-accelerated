@@ -1,10 +1,9 @@
 use crate::{eval, Context, Function, InputMatrix, Params};
 
 pub struct Problem<'c> {
-    pub(crate) dimension: usize,
-
-    #[cfg(feature = "reference")]
-    pub(crate) instance_reference: coco::Problem<'c>,
+    pub function: Function,
+    pub dimension: usize,
+    pub instance: usize,
 
     #[cfg(feature = "c")]
     pub(crate) instance_c: eval::futhark_c::Problem<'c>,
@@ -20,23 +19,17 @@ pub struct Problem<'c> {
 }
 
 impl<'c> Problem<'c> {
-    pub fn new(context: &'c mut Context, function: Function, dimension: usize) -> Self {
+    pub fn new(context: &'c Context, function: Function, dimension: usize) -> Self {
         Problem::new_instance(context, function, dimension, 1)
     }
 
     pub fn new_instance(
-        context: &'c mut Context,
+        context: &'c Context,
         function: Function,
         dimension: usize,
         instance: usize,
     ) -> Self {
         let params = Params::from(function, dimension, instance);
-
-        #[cfg(feature = "reference")]
-        let instance_reference = context
-            .coco
-            .problem_by_function_dimension_instance(function as usize, dimension, instance)
-            .unwrap();
 
         #[cfg(feature = "c")]
         let instance_c = eval::futhark_c::Problem::new(
@@ -67,10 +60,9 @@ impl<'c> Problem<'c> {
         );
 
         Problem {
+            function,
             dimension,
-
-            #[cfg(feature = "reference")]
-            instance_reference,
+            instance,
 
             #[cfg(feature = "c")]
             instance_c,
@@ -86,42 +78,38 @@ impl<'c> Problem<'c> {
         }
     }
 
-    #[allow(unused_variables)]
-    #[cfg(any(feature = "reference", feature = "c"))]
-    pub fn target_hit(&self, value: f64) -> bool {
-        #[cfg(feature = "reference")]
-        return self.instance_reference.final_target_hit();
+    #[cfg(feature = "reference")]
+    pub fn get_reference_instance<'s>(
+        &self,
+        coco: &'s mut crate::reference::Suite,
+    ) -> crate::reference::Problem<'s> {
+        let inner = coco
+            .inner
+            .problem_by_function_dimension_instance(
+                self.function as usize,
+                self.dimension,
+                self.instance,
+            )
+            .unwrap();
 
-        #[cfg(not(feature = "reference"))]
-        return self.instance_c.target_hit(value);
+        crate::reference::Problem { inner }
     }
 
-    #[cfg(feature = "reference")]
-    pub fn eval_coco(&mut self, x: InputMatrix) -> Vec<f64> {
-        assert!(crate::DIMENSIONS.contains(&x.dimension()));
-        assert_eq!(self.dimension, x.dimension());
-
-        let mut output = Vec::with_capacity(x.inputs());
-        for x in x.iter_inputs() {
-            output.push({
-                let y = &mut [0.0];
-                self.instance_reference.evaluate_function(x, y);
-                y[0]
-            });
-        }
-
-        output
+    #[allow(unused_variables)]
+    #[cfg(feature = "c")]
+    pub fn target_hit(&self, value: f64) -> bool {
+        self.instance_c.target_hit(value)
     }
 
     #[cfg(feature = "c")]
-    pub fn eval_futhark_c(&mut self, x: InputMatrix) -> Vec<f64> {
+    pub fn eval_futhark_c(&self, x: InputMatrix) -> Vec<f64> {
         assert_eq!(self.dimension, x.dimension());
 
         self.instance_c.evaluate(x).unwrap()
     }
 
     #[cfg(feature = "multicore")]
-    pub fn eval_futhark_multicore(&mut self, x: InputMatrix) -> Vec<f64> {
+    pub fn eval_futhark_multicore(&self, x: InputMatrix) -> Vec<f64> {
         assert_eq!(self.dimension, x.dimension());
 
         self.instance_multicore.evaluate(x).unwrap()
@@ -141,15 +129,8 @@ impl<'c> Problem<'c> {
         self.instance_cuda.evaluate(x).unwrap()
     }
 
-    #[cfg(feature = "reference")]
-    pub fn eval_coco_single(&mut self, x: &[f64]) -> f64 {
-        let x = InputMatrix::new(x, x.len());
-
-        self.eval_coco(x).pop().unwrap()
-    }
-
     #[cfg(feature = "c")]
-    pub fn eval_futhark_c_single(&mut self, x: &[f64]) -> f64 {
+    pub fn eval_futhark_c_single(&self, x: &[f64]) -> f64 {
         let x = InputMatrix::new(x, x.len());
 
         self.eval_futhark_c(x).pop().unwrap()

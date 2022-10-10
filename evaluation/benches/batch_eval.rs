@@ -1,4 +1,4 @@
-use coco_accelerated::{Context, Function, InputMatrix, IntoEnumIterator, Problem};
+use coco_accelerated::{reference, Context, Function, InputMatrix, IntoEnumIterator, Problem};
 use criterion::{criterion_main, BenchmarkId, Criterion, Throughput};
 use rand::{distributions, prelude::*};
 
@@ -18,12 +18,18 @@ pub fn functions_to_bench() -> Vec<Function> {
 }
 
 pub fn compare_function(c: &mut Criterion, function: Function) {
+    #[cfg(feature = "reference")]
+    let coco = &mut reference::Suite::new();
+
     let context = &mut Context::new();
     let generator = &mut rand::rngs::StdRng::seed_from_u64(RAND_SEED);
 
     let mut group = c.benchmark_group(function.to_string());
     for dimension in DIMENSIONS {
         let problem = &mut Problem::new(context, function, dimension);
+
+        #[cfg(feature = "reference")]
+        let reference = &mut problem.get_reference_instance(coco);
 
         for batch_size in BATCH_SIZES {
             let id = |name| BenchmarkId::new(name, format!("{dimension}x{batch_size}"));
@@ -58,7 +64,7 @@ pub fn compare_function(c: &mut Criterion, function: Function) {
 
             #[cfg(feature = "reference")]
             group.bench_with_input(id("reference"), &batch_size, |b, _dim| {
-                b.iter(|| problem.eval_coco(input))
+                b.iter(|| reference.eval_coco(input))
             });
         }
     }

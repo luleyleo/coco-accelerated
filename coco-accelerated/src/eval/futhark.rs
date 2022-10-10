@@ -29,6 +29,8 @@ macro_rules! declare_params {
             },
         }
 
+        unsafe impl Send for FParams<'static> {}
+
         impl<'c> FParams<'c> {
             pub fn fopt(&self) -> f64 {
                 *match self {

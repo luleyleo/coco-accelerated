@@ -1,6 +1,6 @@
 #![allow(clippy::type_complexity)]
 
-use coco_accelerated::{Context, Function, Problem};
+use coco_accelerated::{reference, Context, Function, Problem};
 use proptest::{
     prelude::*,
     test_runner::{FileFailurePersistence, TestError, TestRunner},
@@ -86,10 +86,12 @@ fn bbob() {
 
     for &(function, check) in FUNCTIONS {
         let result = runner.run(strategy, |x| {
+            let coco = &mut reference::Suite::new();
             let context = &mut Context::new();
             let problem = &mut Problem::new(context, function, x.len());
+            let reference = &mut problem.get_reference_instance(coco);
 
-            let cres = problem.eval_coco_single(&x);
+            let cres = reference.eval_coco_single(&x);
             let ares = problem.eval_futhark_c_single(&x);
 
             check(cres, ares);

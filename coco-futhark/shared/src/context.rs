@@ -12,8 +12,8 @@ impl Context {
         Context { config, inner }
     }
 
-    pub fn config(&mut self) -> &mut Config {
-        &mut self.config
+    pub fn config(&self) -> &Config {
+        &self.config
     }
 
     pub fn sync(&self) -> bool {
