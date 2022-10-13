@@ -101,10 +101,17 @@ impl<'c> Problem<'c> {
         crate::reference::Problem { inner }
     }
 
-    #[allow(unused_variables)]
-    #[cfg(feature = "c")]
+    #[allow(unused_variables, unreachable_code)]
+    #[cfg(any(feature = "c", feature = "multicore", feature = "cuda"))]
     pub fn target_hit(&self, value: f64) -> bool {
-        self.instance_c.target_hit(value)
+        #[cfg(feature = "c")]
+        return self.instance_c.target_hit(value);
+
+        #[cfg(feature = "multicore")]
+        return self.instance_multicore.target_hit(value);
+
+        #[cfg(feature = "cuda")]
+        return self.instance_cuda.target_hit(value);
     }
 
     #[cfg(feature = "c")]
@@ -122,14 +129,14 @@ impl<'c> Problem<'c> {
     }
 
     #[cfg(feature = "opencl")]
-    pub fn eval_futhark_opencl(&mut self, x: InputMatrix) -> Vec<f64> {
+    pub fn eval_futhark_opencl(&self, x: InputMatrix) -> Vec<f64> {
         assert_eq!(self.dimension, x.dimension());
 
         self.instance_opencl.evaluate(x).unwrap()
     }
 
     #[cfg(feature = "cuda")]
-    pub fn eval_futhark_cuda(&mut self, x: InputMatrix) -> Vec<f64> {
+    pub fn eval_futhark_cuda(&self, x: InputMatrix) -> Vec<f64> {
         assert_eq!(self.dimension, x.dimension());
 
         self.instance_cuda.evaluate(x).unwrap()
@@ -143,7 +150,7 @@ impl<'c> Problem<'c> {
     }
 
     #[cfg(feature = "opencl")]
-    pub fn eval_futhark_opencl_single(&mut self, x: &[f64]) -> f64 {
+    pub fn eval_futhark_opencl_single(&self, x: &[f64]) -> f64 {
         let x = InputMatrix::new(x, x.len());
 
         self.eval_futhark_opencl(x).pop().unwrap()
