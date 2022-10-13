@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::{eval, Context, Function, InputMatrix, Params};
 
 pub struct Problem<'c> {
@@ -16,6 +18,8 @@ pub struct Problem<'c> {
 
     #[cfg(feature = "cuda")]
     pub(crate) instance_cuda: eval::futhark_cuda::Problem<'c>,
+
+    phantom: PhantomData<&'c ()>,
 }
 
 impl<'c> Problem<'c> {
@@ -75,6 +79,8 @@ impl<'c> Problem<'c> {
 
             #[cfg(feature = "cuda")]
             instance_cuda,
+
+            phantom: PhantomData,
         }
     }
 
