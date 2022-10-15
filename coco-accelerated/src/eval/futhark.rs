@@ -85,7 +85,7 @@ macro_rules! declare_params {
                         );
                         assert_eq!(a.len(), peaks, "a must have length of peaks");
 
-                        let y = storage::F64_2D::new(ctx, &y, peaks, R.dimension);
+                        let y = storage::F64_2D::new(ctx, &y, R.dimension, peaks);
                         let a = storage::F64_1D::new(ctx, &a);
                         let w = storage::F64_1D::new(ctx, &w);
                         let c = storage::F64_2D::new(ctx, &c, peaks, R.dimension);

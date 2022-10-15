@@ -164,15 +164,18 @@ def schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
     |> (+ 100 * t.pen (map (/ 100) z))
     |> (+ fopt)
 
-def gallagher [p][d] (x: [d]f64) (y: [p][d]f64) (a: [p]f64) (w: [p]f64) (c: [p][d]f64) (fopt: f64) (R: [d][d]f64): f64 =
-    let factor = -1 / (2 * (dim x)) in
-    --let unit = replicate d 1 in
-    --let a4: [p]f64 = a |> map f64.sqrt |> map f64.sqrt in
-    --let c: [p][d]f64 = (iota p) |> map (\i -> (t.A a[i] unit) |> map (/ a4[i])) in
-    let e: [p]f64 = (iota p) |> map (\i -> w[i] * f64.exp (factor * (raw.gallagher x y[i] c[i] R))) in
+-- y = x_local
+-- a = arrCondition
+-- w = peak_values
+-- c = array_scales
+def gallagher [p][d] (x: [d]f64) (y: [d][p]f64) (a: [p]f64) (w: [p]f64) (c: [p][d]f64) (fopt: f64) (R: [d][d]f64): f64 =
+    let xrot = t.rotate R x in
+    let factor = -0.5 / dim x in
+    let e: [p]f64 = (iota p) |> map (\i -> w[i] * f64.exp (factor * (iota d |> map (\j -> c[i, j] * (xrot[j] - y[j, i])**2) |> f64.sum))) in
 
-    (10 - f64.maximum e) ** 2
+    (10 - f64.maximum e)
     |> t.y_osz
+    |>  (** 2)
     |> (+ t.pen x)
     |> (+ fopt)
 
