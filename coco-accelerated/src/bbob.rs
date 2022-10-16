@@ -160,9 +160,9 @@ impl Params {
                 xopt = coco_legacy::compute_xopt(rseed + 1000000, dimension);
             }
             Function::LunacekBiRastrigin => {
-                xopt = coco_legacy::compute_unif(rseed, dimension);
+                xopt = coco_legacy::compute_gauss(rseed, dimension);
                 for xi in &mut xopt {
-                    *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
+                    *xi = if *xi >= 0.0 { 1.0 } else { -1.0 };
                 }
             }
             Function::Schwefel => {
@@ -196,11 +196,17 @@ impl Params {
             | Function::RastriginRotated
             | Function::Schaffers1
             | Function::Schaffers2
-            | Function::Katsuura
-            | Function::LunacekBiRastrigin => {
+            | Function::Katsuura => {
                 let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
                 let Q = coco_legacy::compute_rotation(rseed, dimension);
                 Params::DoubleRotated { fopt, xopt, R, Q }
+            }
+
+            Function::LunacekBiRastrigin => {
+                let R = coco_legacy::compute_rotation(rseed + 1000000, dimension);
+                let Q = coco_legacy::compute_rotation(rseed, dimension);
+                let M = precompute_matrix_multiplication_with_conditioning(&R, &Q, 100.0);
+                Params::Rotated { fopt, xopt, R: M }
             }
 
             Function::AttractiveSector | Function::SharpRidge => {

@@ -200,17 +200,17 @@ def katsuura [d] (x: [d]f64) (xopt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d
     |> (+ t.pen x)
     |> (+ fopt)
 
-def lunacek [d] (x: [d]f64) (opt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d]f64): f64 =
-    let x' = x |> map2 (*) opt |> map (*2) in
-    let s = 1 - (1 / (2 * f64.sqrt(dim x' + 20) - 8.2)) in
+def lunacek [d] (x: [d]f64) (opt: [d]f64) (fopt: f64) (R: [d][d]f64): f64 =
+    let x' = map2 (*) opt x |> map (*2) in
+    let s = 1 - (1 / (2 * f64.sqrt(dim x + 20) - 8.2)) in
 
     let u0 = 2.5 in
-    let u1 = -f64.sqrt ((u0 ** 2 - dim x) / s) in
+    let u1 = -f64.sqrt ((u0 ** 2 - 1) / s) in
 
-    let z = x' |> map (subbed u0) |> mat'vec Q |> t.A 100 |> mat'vec R in
+    let z = x' |> map (subbed u0) |> mat'vec R in
 
     let v0 = f64.sum (x' |> map (subbed u0) |> map (**2)) in
-    let v1 = dim x' + s * f64.sum (x' |> map (subbed u1) |> map (**2)) in
+    let v1 = dim x + s * f64.sum (x' |> map (subbed u1) |> map (**2)) in
     let v3 = dim x - f64.sum (z |> map (2 * f64.pi *) |> map f64.cos) in
 
-    ((f64.min v0 v1) + 10 * v3) + (10**4 * t.pen x) + fopt
+    (f64.min v0 v1) + 10 * v3 + (10**4 * t.pen x) + fopt

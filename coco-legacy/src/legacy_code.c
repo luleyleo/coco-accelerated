@@ -98,7 +98,7 @@ static double **bbob2009_reshape(double **B, double *vector, const size_t m, con
 /**
  * @brief Generates N Gaussian random numbers using the given seed and stores them in g.
  */
-static void bbob2009_gauss(double *g, const size_t N, const long seed)
+void bbob2009_gauss(double *g, const size_t N, const long seed)
 {
     size_t i;
     double uniftmp[6000];

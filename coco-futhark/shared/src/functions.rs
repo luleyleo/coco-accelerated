@@ -394,7 +394,6 @@ pub fn lunacek(
     xopt: &F64_1D,
     fopt: f64,
     R: &F64_2D,
-    Q: &F64_2D,
 ) -> bool {
-    run::double_rotated_bbob(ctx, sys::futhark_entry_lunacek, output, x, xopt, fopt, R, Q)
+    run::rotated_bbob(ctx, sys::futhark_entry_lunacek, output, x, xopt, fopt, R)
 }

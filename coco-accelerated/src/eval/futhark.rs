@@ -190,8 +190,8 @@ macro_rules! declare_eval {
                 (Function::Katsuura, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
                     functions::katsuura(ctx, &mut output, x, xopt, *fopt, R, Q)
                 }
-                (Function::LunacekBiRastrigin, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-                    functions::lunacek(ctx, &mut output, x, xopt, *fopt, R, Q)
+                (Function::LunacekBiRastrigin, FParams::Rotated { fopt, xopt, R }) => {
+                    functions::lunacek(ctx, &mut output, x, xopt, *fopt, R)
                 }
                 _ => panic!("illegal (Function, Params) combination"),
             };

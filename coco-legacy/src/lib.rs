@@ -43,6 +43,7 @@ impl IndexMut<usize> for Matrix {
 
 extern "C" {
     fn bbob2009_unif(r: *mut f64, dim: isize, inseed: i64);
+    fn bbob2009_gauss(r: *mut f64, dim: isize, inseed: i64);
     fn bbob2009_compute_xopt(xopt: *mut f64, seed: i64, dim: isize);
     fn bbob2009_compute_fopt(function: isize, instance: isize) -> f64;
     fn bbob2009_compute_rotation(matrix: CocoMatrix, seed: i64, dim: isize);
@@ -56,6 +57,16 @@ pub fn compute_unif(seed: usize, dimension: usize) -> Vec<f64> {
     }
 
     unif
+}
+
+pub fn compute_gauss(seed: usize, dimension: usize) -> Vec<f64> {
+    let mut gauss = vec![0.0; dimension];
+
+    unsafe {
+        bbob2009_gauss(gauss.as_mut_ptr(), dimension as isize, seed as i64);
+    }
+
+    gauss
 }
 
 pub fn compute_xopt(seed: usize, dimension: usize) -> Vec<f64> {

@@ -60,7 +60,9 @@ static FUNCTIONS: &[(Function, fn(f64, f64))] = &[
     (Function::Katsuura, |c, a| {
         assert_float_eq!(c, a, abs <= 1e-11);
     }),
-    //(Function::LunacekBiRastrigin, strict),
+    (Function::LunacekBiRastrigin, |c, a| {
+        assert_float_eq!(c, a, abs <= 1e-12);
+    }),
 ];
 
 fn x_strategy() -> impl Strategy<Value = Vec<f64>> {

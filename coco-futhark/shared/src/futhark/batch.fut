@@ -66,5 +66,5 @@ entry gallagher [b][p][d] (x: [b][d]f64) (y: [d][p]f64) (w: [p]f64) (c: [p][d]f6
 entry katsuura [b][d] (x: [b][d]f64) (xopt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d]f64): []f64 =
     x |> map (\x -> bbob.katsuura x xopt fopt R Q)
 
-entry lunacek [b][d] (x: [b][d]f64) (opt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d]f64): []f64 =
-    x |> map (\x -> bbob.lunacek x opt fopt R Q)
+entry lunacek [b][d] (x: [b][d]f64) (opt: [d]f64) (fopt: f64) (R: [d][d]f64): []f64 =
+    x |> map (\x -> bbob.lunacek x opt fopt R)
