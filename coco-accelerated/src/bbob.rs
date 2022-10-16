@@ -76,7 +76,8 @@ pub enum Params {
         fopt: f64,
         peaks: usize,
         y: Vec<f64>,
-        a: Vec<f64>,
+        w: Vec<f64>,
+        c: Vec<f64>,
         R: Matrix,
     },
 }
@@ -158,10 +159,17 @@ impl Params {
                 // No clue why they did this, probably it was a typo?
                 xopt = coco_legacy::compute_xopt(rseed + 1000000, dimension);
             }
-            Function::LunacekBiRastrigin | Function::Schwefel => {
+            Function::LunacekBiRastrigin => {
                 xopt = coco_legacy::compute_unif(rseed, dimension);
                 for xi in &mut xopt {
                     *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
+                }
+            }
+            Function::Schwefel => {
+                xopt = coco_legacy::compute_unif(rseed, dimension);
+                for xi in &mut xopt {
+                    *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
+                    *xi *= 0.5 * 4.2096874637;
                 }
             }
             _ => {}
@@ -228,38 +236,78 @@ impl Params {
                     _ => unreachable!(),
                 };
 
-                let adiv = (peaks - 2) as f64;
-
-                let mut aperm = coco_legacy::compute_unif(rseed, peaks - 1)
+                // a == arrCondition
+                let mut rperm = coco_legacy::compute_unif(rseed, peaks - 1)
                     .into_iter()
                     .enumerate()
                     .collect::<Vec<_>>();
-                aperm.sort_unstable_by_key(|&(_, x)| OrderedFloat(x));
-                let mut a = aperm
+                rperm.sort_unstable_by_key(|&(_, x)| OrderedFloat(x));
+                let mut a = rperm
                     .into_iter()
-                    .map(|(i, _)| (i + 1) as f64)
-                    .map(|j| 1000f64.powf(2.0 * j / adiv))
+                    .map(|(i, _)| i as f64)
+                    .map(|j| 1000f64.powf(j / ((peaks - 2) as f64)))
                     .collect::<Vec<_>>();
 
                 match function {
-                    Function::Gallagher1 => a.insert(0, 1000.0),
-                    Function::Gallagher2 => a.insert(0, 1000000.0),
+                    Function::Gallagher1 => a.insert(0, f64::sqrt(1000.0)), // might be 100
+                    Function::Gallagher2 => a.insert(0, 1000.0),            // might be 1000
                     _ => unreachable!(),
                 }
 
-                let mut y = coco_legacy::compute_unif(rseed, dimension * peaks);
-                for i in 0..dimension {
-                    y[i] = y[i] * 8.0 - 4.0;
+                // w = peak_values
+                let mut w = (0..peaks)
+                    .into_iter()
+                    .map(|i| i as f64)
+                    .map(|i| 1.1 + 8.0 * (i - 1.0) / ((peaks - 2) as f64))
+                    .collect::<Vec<_>>();
+                w[0] = 10.0;
+
+                // c == array_scales
+                let mut c = vec![0.0; peaks * dimension];
+                for i in 0..peaks {
+                    let mut aperm = coco_legacy::compute_unif(rseed + (1000 * i), dimension)
+                        .into_iter()
+                        .enumerate()
+                        .collect::<Vec<_>>();
+                    aperm.sort_unstable_by_key(|&(_, x)| OrderedFloat(x));
+                    let aperm = aperm.into_iter().map(|(i, _)| i as f64).collect::<Vec<_>>();
+
+                    for j in 0..dimension {
+                        c[i * dimension + j] =
+                            f64::powf(a[i], aperm[j] / (dimension - 1) as f64 - 0.5)
+                    }
                 }
-                for i in dimension..(dimension * peaks) {
-                    y[i] = y[i] * 10.0 - 5.0;
+
+                let (pb, pc) = match function {
+                    Function::Gallagher1 => (10.0, 5.0),
+                    Function::Gallagher2 => (9.8, 4.9),
+                    _ => unreachable!(),
+                };
+
+                // y == x_local
+                let random_numbers = coco_legacy::compute_unif(rseed, dimension * peaks);
+                let mut y = vec![0.0; dimension * peaks];
+                for i in 0..dimension {
+                    for j in 0..peaks {
+                        y[i * peaks + j] = 0.0;
+
+                        for k in 0..dimension {
+                            y[i * peaks + j] +=
+                                R[i][k] * (pb * random_numbers[j * dimension + k] - pc);
+                        }
+
+                        if j == 0 {
+                            y[i * peaks + j] *= 0.8;
+                        }
+                    }
                 }
 
                 Params::Gallagher {
                     fopt,
                     peaks,
                     y,
-                    a,
+                    w,
+                    c,
                     R,
                 }
             }

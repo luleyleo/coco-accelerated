@@ -339,7 +339,8 @@ pub fn gallagher(
     output: &mut Vec<f64>,
     x: &F64_2D,
     y: &F64_2D,
-    a: &F64_1D,
+    w: &F64_1D,
+    c: &F64_2D,
     fopt: f64,
     R: &F64_2D,
 ) -> bool {
@@ -349,7 +350,7 @@ pub fn gallagher(
 
     let status = unsafe {
         (function)(
-            ctx.inner, &mut out, x.inner, y.inner, a.inner, fopt, R.inner,
+            ctx.inner, &mut out, x.inner, y.inner, w.inner, c.inner, fopt, R.inner,
         ) == 0
     };
     let sync_status = ctx.sync();

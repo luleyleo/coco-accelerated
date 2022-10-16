@@ -24,7 +24,8 @@ macro_rules! declare_params {
             Gallagher {
                 fopt: f64,
                 y: $backend::storage::F64_2D<'c>,
-                a: $backend::storage::F64_1D<'c>,
+                w: $backend::storage::F64_1D<'c>,
+                c: $backend::storage::F64_2D<'c>,
                 R: $backend::storage::F64_2D<'c>,
             },
         }
@@ -79,7 +80,8 @@ macro_rules! declare_params {
                         fopt,
                         peaks,
                         ref y,
-                        ref a,
+                        ref w,
+                        ref c,
                         ref R,
                     } => {
                         assert!(
@@ -91,13 +93,13 @@ macro_rules! declare_params {
                             y.len(),
                             "y must have length of dim * peaks"
                         );
-                        assert_eq!(a.len(), peaks, "a must have length of peaks");
 
-                        let y = storage::F64_2D::new(ctx, &y, peaks, R.dimension);
-                        let a = storage::F64_1D::new(ctx, &a);
+                        let y = storage::F64_2D::new(ctx, &y, R.dimension, peaks);
+                        let w = storage::F64_1D::new(ctx, &w);
+                        let c = storage::F64_2D::new(ctx, &c, peaks, R.dimension);
                         let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
 
-                        FParams::Gallagher { fopt, y, a, R }
+                        FParams::Gallagher { fopt, y, w, c, R }
                     }
                 }
             }
@@ -183,8 +185,8 @@ macro_rules! declare_eval {
                 }
                 (
                     Function::Gallagher1 | Function::Gallagher2,
-                    FParams::Gallagher { y, a, fopt, R },
-                ) => functions::gallagher(ctx, &mut output, x, y, a, *fopt, R),
+                    FParams::Gallagher { y, w, c, fopt, R },
+                ) => functions::gallagher(ctx, &mut output, x, y, w, c, *fopt, R),
                 (Function::Katsuura, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
                     functions::katsuura(ctx, &mut output, x, xopt, *fopt, R, Q)
                 }

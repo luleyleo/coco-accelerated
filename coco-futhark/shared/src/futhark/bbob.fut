@@ -148,30 +148,43 @@ def griewank_rosenbrock (x: []f64) (fopt: f64) (R: [][]f64): f64 =
     |> raw.griewank_rosenbrock
     |> (+ fopt)
 
-local def schwefel_z (x: *[]f64) (xopt: []f64): *[]f64 =
+local def schwefel_z (xopt: []f64) (x: []f64): *[]f64 =
     let n = length x in
-    loop acc = x for i in 1 ..< n do
-        acc with [i] = acc[i] + 0.25 * (acc[i-1] - xopt[i-1])
+    loop acc = copy x for i in 1 ..< n do
+        acc with [i] = x[i] + 0.25 * (x[i-1] - 2 * f64.abs(xopt[i-1]))
 
-def schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
-    let xopt = map (* 4.2096874633/2) xopt_sign in
-    let x' = map (2 *) (map2 (*) xopt_sign x) in
-    let xopt2 = xopt |> map f64.abs |> map (*2) in
-    let z' = schwefel_z x' xopt2 in
-    let z = z' |> map2 subbed xopt2 |> t.A 10 |> map2 (+) xopt2 |> map (* 100) in
-    z
-    |> raw.schwefel
-    |> (+ 100 * t.pen (map (/ 100) z))
+def schwefel (x: []f64) (xopt: []f64) (fopt: f64): f64 =
+    let z = x
+            |> map2 (*) (xopt |> map sign)
+            |> map (*2)
+            |> schwefel_z xopt
+            |> t.shift (xopt |> map f64.abs |> map ( 2 *))
+            |> t.A 10
+            |> t.shift (xopt |> map f64.abs |> map (-2 *))
+            |> map (100 *)
+    in
+
+    0
+    |> (+ raw.schwefel z)
+    |> (+ 100 * t.pen (z |> map (/ 100)))
     |> (+ fopt)
 
-def gallagher [p][d] (x: [d]f64) (y: [p][d]f64) (a: [p]f64) (fopt: f64) (R: [d][d]f64): f64 =
-    let div = f64.i64 p - 2 in
-    let c: [p][d]f64 = a |> map (\ai -> (t.A ai (replicate d 1)) |> map (/ ai**0.25)) in
-    let w: [p]f64 = ((iota p) |> map f64.i64 |> map (\i -> 1.1 + 8 * (i - 1) / div)) with [0] = 10 in
-    let e: [p]f64 = (iota p) |> map (\i -> w[i] * f64.exp (-1 / (2 * (dim x)) * (raw.gallagher x y[i] c[i] R))) in
+-- y = x_local
+-- a = arrCondition
+-- w = peak_values
+-- c = array_scales
+-- xrot = tmx
+-- core = tmp2
+-- e = f
+def gallagher [p][d] (x: [d]f64) (y: [d][p]f64) (w: [p]f64) (c: [p][d]f64) (fopt: f64) (R: [d][d]f64): f64 =
+    let xrot = t.rotate R x in
+    let factor = -0.5 / dim x in
+    let core = \i -> iota d |> map (\j -> c[i, j] * (xrot[j] - y[j, i])**2) |> f64.sum in
+    let e: [p]f64 = iota p |> map (\i -> w[i] * f64.exp (factor * core i)) in
 
-    (10 - f64.maximum e) ** 2
+    (10 - f64.maximum e)
     |> t.y_osz
+    |>  (** 2)
     |> (+ t.pen x)
     |> (+ fopt)
 
