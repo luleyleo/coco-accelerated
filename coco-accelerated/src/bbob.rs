@@ -225,7 +225,7 @@ impl Params {
                 rperm.sort_unstable_by_key(|&(_, x)| OrderedFloat(x));
                 let mut a = rperm
                     .into_iter()
-                    .map(|(i, _)| (i + 1) as f64)
+                    .map(|(i, _)| i as f64)
                     .map(|j| 1000f64.powf(j / ((peaks - 2) as f64)))
                     .collect::<Vec<_>>();
 
@@ -251,10 +251,7 @@ impl Params {
                         .enumerate()
                         .collect::<Vec<_>>();
                     aperm.sort_unstable_by_key(|&(_, x)| OrderedFloat(x));
-                    let aperm = aperm
-                        .into_iter()
-                        .map(|(i, _)| (i + 1) as f64)
-                        .collect::<Vec<_>>();
+                    let aperm = aperm.into_iter().map(|(i, _)| i as f64).collect::<Vec<_>>();
 
                     for j in 0..dimension {
                         c[i * dimension + j] =
