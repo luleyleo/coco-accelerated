@@ -60,8 +60,8 @@ entry griewank_rosenbrock (x: [][]f64) (fopt: f64) (R: [][]f64): []f64 =
 entry schwefel (x: [][]f64) (xopt: []f64) (fopt: f64): []f64 =
     x |> map (\x -> bbob.schwefel x xopt fopt)
 
-entry gallagher [b][p][d] (x: [b][d]f64) (y: [d][p]f64) (a: [p]f64) (w: [p]f64) (c: [p][d]f64) (fopt: f64) (R: [d][d]f64): [b]f64 =
-    x |> map (\x -> bbob.gallagher x y a w c fopt R)
+entry gallagher [b][p][d] (x: [b][d]f64) (y: [d][p]f64) (w: [p]f64) (c: [p][d]f64) (fopt: f64) (R: [d][d]f64): [b]f64 =
+    x |> map (\x -> bbob.gallagher x y w c fopt R)
 
 entry katsuura [b][d] (x: [b][d]f64) (xopt: [d]f64) (fopt: f64) (R: [d][d]f64) (Q: [d][d]f64): []f64 =
     x |> map (\x -> bbob.katsuura x xopt fopt R Q)
