@@ -146,10 +146,17 @@ impl Params {
                 // No clue why they did this, probably it was a typo?
                 xopt = coco_legacy::compute_xopt(rseed + 1000000, dimension);
             }
-            Function::LunacekBiRastrigin | Function::Schwefel => {
+            Function::LunacekBiRastrigin => {
                 xopt = coco_legacy::compute_unif(rseed, dimension);
                 for xi in &mut xopt {
                     *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
+                }
+            }
+            Function::Schwefel => {
+                xopt = coco_legacy::compute_unif(rseed, dimension);
+                for xi in &mut xopt {
+                    *xi = if *xi >= 0.5 { 1.0 } else { -1.0 };
+                    *xi *= 0.5 * 4.2096874637;
                 }
             }
             _ => {}
