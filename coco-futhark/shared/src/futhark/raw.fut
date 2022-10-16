@@ -110,10 +110,13 @@ def gallagher [d] (x: [d]f64) (yi: [d]f64) (Ci: [d]f64) (R: [d][d]f64): f64 =
 
 -- f23: katsuura
 
+-- katsuura_elem = tmp
 def katsuura_elem (xi: f64): f64 =
-    let range = (1...32) |> map f64.i64 in
-    let powers = range |> map (2**) in
-    powers |> map (\p -> f64.abs ((p * xi) - (f64.round (p * xi))) / p) |> f64.sum
+    (1...32)
+    |> map f64.i64
+    |> map (2**)
+    |> map (\p -> f64.abs ((p * xi) - (f64.round (p * xi))) / p)
+    |> f64.sum
 
 def katsuura [d] (x: [d]f64): f64 =
     let power = 10 / ((dim x) ** 1.2) in
