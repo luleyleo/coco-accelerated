@@ -168,10 +168,14 @@ def schwefel (x: []f64) (xopt_sign: []f64) (fopt: f64): f64 =
 -- a = arrCondition
 -- w = peak_values
 -- c = array_scales
+-- xrot = tmx
+-- core = tmp2
+-- e = f
 def gallagher [p][d] (x: [d]f64) (y: [d][p]f64) (a: [p]f64) (w: [p]f64) (c: [p][d]f64) (fopt: f64) (R: [d][d]f64): f64 =
     let xrot = t.rotate R x in
     let factor = -0.5 / dim x in
-    let e: [p]f64 = (iota p) |> map (\i -> w[i] * f64.exp (factor * (iota d |> map (\j -> c[i, j] * (xrot[j] - y[j, i])**2) |> f64.sum))) in
+    let core = \i -> iota d |> map (\j -> c[i, j] * (xrot[j] - y[j, i])**2) |> f64.sum in
+    let e: [p]f64 = iota p |> map (\i -> w[i] * f64.exp (factor * core i)) in
 
     (10 - f64.maximum e)
     |> t.y_osz
