@@ -50,6 +50,7 @@ pub fn build_target(compiler: &str) {
 
     bindgen::Builder::default()
         .clang_arg("-I/opt/cuda/include")
+        .clang_arg("-I/nix/store/g15j0y3fzvx4kkry4viymn698m1gk8yx-cudatoolkit-11.7.0/include")
         .header(target.join("raw.h").to_string_lossy())
         .allowlist_function("free")
         .allowlist_function("futhark_.*")
