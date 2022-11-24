@@ -64,5 +64,5 @@ pub fn build_target(compiler: &str) {
         .file(target.join("raw.c"))
         .include("/opt/cuda/include")
         .warnings(false)
-        .compile(&format!("coco-futhark-{compiler}"));
+        .compile(&format!("coco-futhark-{compiler}", compiler = compiler));
 }
