@@ -20,6 +20,7 @@
         packages = [
           pkgs.cargo
           pkgs.cargo-criterion
+          pkgs.libclang
           pkgs.futhark
           pkgs.cudaPackages.cudatoolkit
           pkgs.cudaPackages.cudnn
