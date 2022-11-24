@@ -20,6 +20,7 @@
         shellHook = ''
           export LD_LIBRARY_PATH="${
             pkgs.lib.makeLibraryPath [
+              pkgs.cargo
               pkgs.libclang
               pkgs.cudaPackages.cudatoolkit
               pkgs.cudaPackages.cudatoolkit.lib
