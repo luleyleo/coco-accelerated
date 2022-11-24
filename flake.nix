@@ -21,8 +21,8 @@
           pkgs.cargo
           pkgs.cargo-criterion
           pkgs.futhark
-          pkgs.cudaPackages.cudatoolkit_11_2
-          pkgs.cudnn_cudatoolkit_11_2
+          pkgs.cudaPackages.cudatoolkit
+          pkgs.cudaPackages.cudnn
           pkgs.linuxPackages.nvidia_x11
           pkgs.stdenv.cc.cc
         ];
