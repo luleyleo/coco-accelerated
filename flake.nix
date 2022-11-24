@@ -19,6 +19,7 @@
       devShell.x86_64-linux = pkgs.mkShell {
         packages = [
           pkgs.cargo
+          cargo-criterion
           pkgs.futhark
           pkgs.cudaPackages.cudatoolkit_11_2
           pkgs.cudnn_cudatoolkit_11_2
