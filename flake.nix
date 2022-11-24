@@ -17,6 +17,19 @@
 
     in {
       devShell.x86_64-linux = pkgs.mkShell {
+        shellHook = ''
+          export LD_LIBRARY_PATH="${
+            pkgs.lib.makeLibraryPath [
+              pkgs.libclang
+              pkgs.cudaPackages.cudatoolkit
+              pkgs.cudaPackages.cudnn
+              pkgs.linuxPackages.nvidia_x11
+              pkgs.stdenv.cc.cc
+            ]
+          }:$LD_LIBRARY_PATH";
+            unset SOURCE_DATE_EPOCH
+        '';
+
         packages = [
           pkgs.cargo
           pkgs.cargo-criterion
