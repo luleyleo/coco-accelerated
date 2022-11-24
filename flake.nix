@@ -22,6 +22,7 @@
             pkgs.lib.makeLibraryPath [
               pkgs.libclang
               pkgs.cudaPackages.cudatoolkit
+              pkgs.cudaPackages.cudatoolkit.lib
               pkgs.cudaPackages.cudnn
               pkgs.linuxPackages.nvidia_x11
               pkgs.stdenv.cc.cc
