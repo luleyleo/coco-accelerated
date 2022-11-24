@@ -29,7 +29,8 @@
               pkgs.stdenv.cc.cc
             ]
           }:$LD_LIBRARY_PATH";
-            unset SOURCE_DATE_EPOCH
+          unset SOURCE_DATE_EPOCH
+          export CPATH="/nix/store/g15j0y3fzvx4kkry4viymn698m1gk8yx-cudatoolkit-11.7.0/include:$CPATH"
         '';
 
         packages = [
