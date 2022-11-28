@@ -5,15 +5,29 @@
     nixpkgs = {
       url = "github:NixOS/nixpkgs/22.11-beta";
     };
+    nixpkgsOld.url =
+      # Tensorflow is currently a little iffy. This is a working nixpkgs rev
+      # (taken from gerczuma's flake.lock).
+      "github:NixOS/nixpkgs/bc5d68306b40b8522ffb69ba6cff91898c2fbbff";
+
   };
 
-  outputs = inputs@{ self, nixpkgs }:
+  outputs = inputs@{ self, nixpkgs, nixpkgsOld }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
+      pkgsOld = import nixpkgsOld {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
+    cudatoolkit = pkgsOld.cudaPackages.cudatoolkit_11_2;
+    cudnn = pkgsOld.cudnn_cudatoolkit_11_2;
+    nvidia = pkgsOld.linuxPackages.nvidia_x11;
+
 
     in {
       devShell.x86_64-linux = pkgs.mkShell {
@@ -22,15 +36,17 @@
             pkgs.lib.makeLibraryPath [
               pkgs.cargo
               pkgs.libclang
-              pkgs.cudaPackages.cudatoolkit
-              pkgs.cudaPackages.cudatoolkit.lib
-              pkgs.cudaPackages.cudnn
-              pkgs.linuxPackages.nvidia_x11
+              cudatoolkit
+              cudatoolkit.lib
+              cudatoolkit.out
+              nvidia
               pkgs.stdenv.cc.cc
             ]
           }:$LD_LIBRARY_PATH";
           unset SOURCE_DATE_EPOCH
-          export CPATH="${pkgs.cudaPackages.cudatoolkit}/include:$CPATH"
+          export CPATH="${cudatoolkit.out}/include:$CPATH"
+          export LIBRARY_PATH="${cudatoolkit.out}/lib64:$LIBRARY_PATH"
+          export CUDA_HOME="${cudatoolkit.out}"
         '';
 
         packages = [
@@ -39,9 +55,9 @@
           pkgs.clang
           pkgs.libclang
           pkgs.futhark
-          pkgs.cudaPackages.cudatoolkit
-          pkgs.cudaPackages.cudnn
-          pkgs.linuxPackages.nvidia_x11
+          cudatoolkit
+          cudatoolkit.lib
+          nvidia
           pkgs.stdenv.cc.cc
         ];
       };
