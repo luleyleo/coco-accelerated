@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bindgen = "0.59.2"
-cc = "1.0.73"
+bindgen = "0.65.1"
+cc = "1.0.79"
 rerun_except = "1.0.0"
