@@ -1,4 +1,4 @@
 fn main() {
-    futharkc::build_target("multicore");
-    futharkc::watch_source();
+    futharkc::build_target("multicore").unwrap();
+    futharkc::watch_source().unwrap();
 }

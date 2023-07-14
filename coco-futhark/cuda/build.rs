@@ -1,6 +1,6 @@
 fn main() {
-    futharkc::build_target("cuda");
-    futharkc::watch_source();
+    futharkc::build_target("cuda").unwrap();
+    futharkc::watch_source().unwrap();
 
     println!("cargo:rustc-link-search=/opt/cuda/lib64");
     println!("cargo:rustc-link-lib=cuda");

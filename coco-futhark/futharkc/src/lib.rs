@@ -1,68 +1,133 @@
+use bindgen::callbacks::ParseCallbacks;
+use eyre::{bail, ensure, Context, ContextCompat, Result};
 use rerun_except::rerun_except;
-use std::{env, fs, path::PathBuf, process::Command};
+use std::{
+    env,
+    fs::{self, File},
+    io::{BufWriter, Write},
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
+const FUTHARK_SOURCE_FILE: &str = "batch.fut";
+const SOURCE_DIR: &str = "../shared/src/futhark";
 
-fn source_dir() -> PathBuf {
-    let source = PathBuf::from("../shared/src/futhark");
-
-    assert!(source.is_dir(), "src/futhark does not exist");
-
-    source
+fn source_dir_path() -> PathBuf {
+    PathBuf::from(SOURCE_DIR)
 }
 
-fn source_file() -> PathBuf {
-    let source = source_dir().join("batch.fut");
+pub fn watch_source() -> Result<()> {
+    let old_manifest_dir = env::var_os(CARGO_MANIFEST_DIR)
+        .wrap_err("CARGO_MANIFEST_DIR environment variable is not defined.")?;
 
-    assert!(source.is_file(), "bbob.fut does not exist");
+    env::set_var(CARGO_MANIFEST_DIR, source_dir_path().as_os_str());
 
-    source
-}
+    rerun_except(&[])
+        .map_err(|err| eyre::eyre!("{}", err))
+        .wrap_err("Failed to watch files.")?;
 
-pub fn watch_source() {
-    let old_manifest_dir = env::var_os(CARGO_MANIFEST_DIR).unwrap();
-
-    env::set_var(CARGO_MANIFEST_DIR, source_dir().as_os_str());
-    rerun_except(&[]).expect("Failed to watch files.");
     env::set_var(CARGO_MANIFEST_DIR, old_manifest_dir);
+
+    Ok(())
 }
 
-pub fn build_target(compiler: &str) {
-    let out_dir = &env::var("OUT_DIR").expect("OUT_DIR is undefined");
-    let target = &PathBuf::from(out_dir).join("futhark");
-    fs::create_dir_all(&target).expect("Could not create target dir.");
+pub fn build_target(compiler: &str) -> Result<()> {
+    let out_dir = &env::var("OUT_DIR").wrap_err("OUT_DIR is undefined.")?;
 
-    let source = &source_file();
+    let target_dir = &PathBuf::from(out_dir).join("futhark");
+    fs::create_dir_all(&target_dir).wrap_err("Could not create target dir.")?;
+
+    let raw_target_dir = &PathBuf::from(out_dir).join("futhark_raw");
+    fs::create_dir_all(&raw_target_dir).wrap_err("Could not create raw target dir.")?;
+
+    let source = source_dir_path().join(FUTHARK_SOURCE_FILE);
+    ensure!(source.is_file(), "Futhark source file does not exist.");
 
     let futhark_status = Command::new("futhark")
         .args(&[compiler, "--library", "-o"])
-        .arg(target.join("raw"))
+        .arg(raw_target_dir.join("accelerated"))
         .arg(source)
-        .spawn()
-        .unwrap()
-        .wait()
-        .unwrap()
+        .status()
+        .wrap_err("Failed to run Futhark compiler.")?
         .success();
 
     if !futhark_status {
-        panic!("Failed to compile Futhark code");
+        bail!("Failed to compile Futhark code.");
     }
+
+    let prefix = format!("futhark_{compiler}_");
+
+    prefix_items(
+        &prefix,
+        raw_target_dir.join("accelerated.h"),
+        target_dir.join("accelerated.h"),
+    )
+    .wrap_err("Failed to prefix header file items.")?;
+
+    prefix_items(
+        &prefix,
+        raw_target_dir.join("accelerated.c"),
+        target_dir.join("accelerated.c"),
+    )
+    .wrap_err("Failed to prefix source file items.")?;
 
     bindgen::Builder::default()
         .clang_arg("-I/opt/cuda/include")
-        .header(target.join("raw.h").to_string_lossy())
+        .header(target_dir.join("accelerated.h").to_string_lossy())
         .allowlist_function("free")
         .allowlist_function("futhark_.*")
         .allowlist_type("futhark_.*")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(PrefixRemover::new(prefix))
         .generate()
-        .expect("Unable to generate bindings.")
-        .write_to_file(target.join("raw.rs"))
-        .expect("Couldn't write bindings!");
+        .wrap_err("Failed to generate bindings.")?
+        .write_to_file(target_dir.join("accelerated.rs"))
+        .wrap_err("Failed to write bindings to file.")?;
 
     cc::Build::new()
-        .file(target.join("raw.c"))
+        .file(target_dir.join("accelerated.c"))
         .include("/opt/cuda/include")
+        .static_flag(true)
         .warnings(false)
-        .compile(&format!("coco-futhark-{compiler}", compiler = compiler));
+        .try_compile(&format!("coco-futhark-{compiler}", compiler = compiler))
+        .wrap_err("Failed to compile the generated c code.")?;
+
+    Ok(())
+}
+
+fn prefix_items(prefix: &str, input: impl AsRef<Path>, output: impl AsRef<Path>) -> Result<()> {
+    let mut out = BufWriter::new(File::create(output).wrap_err("Failed to open output file.")?);
+
+    for line in fs::read_to_string(input)?.lines() {
+        writeln!(out, "{}", line.replace("futhark_", &prefix))
+            .wrap_err("Failed to write line to output file.")?;
+    }
+
+    out.flush().wrap_err("Failed to flush output file.")?;
+
+    Ok(())
+}
+
+#[derive(Debug)]
+struct PrefixRemover {
+    prefix: String,
+}
+
+impl PrefixRemover {
+    pub fn new(prefix: impl ToOwned<Owned = String>) -> Box<dyn ParseCallbacks> {
+        Box::new(PrefixRemover {
+            prefix: prefix.to_owned(),
+        })
+    }
+}
+
+impl ParseCallbacks for PrefixRemover {
+    fn item_name(&self, original_item_name: &str) -> Option<String> {
+        if original_item_name.contains(&self.prefix) {
+            return Some(original_item_name.replace(&self.prefix, "futhark_"));
+        }
+
+        None
+    }
 }
