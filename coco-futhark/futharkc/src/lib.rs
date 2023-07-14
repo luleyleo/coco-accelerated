@@ -99,9 +99,16 @@ pub fn build_target(compiler: &str) -> Result<()> {
 fn prefix_items(prefix: &str, input: impl AsRef<Path>, output: impl AsRef<Path>) -> Result<()> {
     let mut out = BufWriter::new(File::create(output).wrap_err("Failed to open output file.")?);
 
+    let memblock_prefix = &format!("{prefix}_memblock_");
+    let lexical_realloc_error_prefix = &format!("{prefix}_lexical_realloc_error");
+
     for line in fs::read_to_string(input)?.lines() {
-        writeln!(out, "{}", line.replace("futhark_", &prefix))
-            .wrap_err("Failed to write line to output file.")?;
+        let new_line = line
+            .replace("memblock_", memblock_prefix)
+            .replace("lexical_realloc_error", lexical_realloc_error_prefix)
+            .replace("futhark_", &prefix);
+
+        writeln!(out, "{}", new_line).wrap_err("Failed to write line to output file.")?;
     }
 
     out.flush().wrap_err("Failed to flush output file.")?;
