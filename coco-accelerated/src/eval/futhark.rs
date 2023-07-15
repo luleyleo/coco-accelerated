@@ -1,32 +1,32 @@
 #[macro_export]
 macro_rules! declare_params {
-    ($backend:ident) => {
+    ($backend:path) => {
         pub enum FParams<'c> {
             Basic {
                 fopt: f64,
-                xopt: $backend::storage::F64_1D<'c>,
+                xopt: coco_futhark::storage::F64_1D<'c, $backend>,
             },
             Rotated {
                 fopt: f64,
-                xopt: $backend::storage::F64_1D<'c>,
-                R: $backend::storage::F64_2D<'c>,
+                xopt: coco_futhark::storage::F64_1D<'c, $backend>,
+                R: coco_futhark::storage::F64_2D<'c, $backend>,
             },
             FixedRotated {
                 fopt: f64,
-                R: $backend::storage::F64_2D<'c>,
+                R: coco_futhark::storage::F64_2D<'c, $backend>,
             },
             DoubleRotated {
                 fopt: f64,
-                xopt: $backend::storage::F64_1D<'c>,
-                R: $backend::storage::F64_2D<'c>,
-                Q: $backend::storage::F64_2D<'c>,
+                xopt: coco_futhark::storage::F64_1D<'c, $backend>,
+                R: coco_futhark::storage::F64_2D<'c, $backend>,
+                Q: coco_futhark::storage::F64_2D<'c, $backend>,
             },
             Gallagher {
                 fopt: f64,
-                y: $backend::storage::F64_2D<'c>,
-                w: $backend::storage::F64_1D<'c>,
-                c: $backend::storage::F64_2D<'c>,
-                R: $backend::storage::F64_2D<'c>,
+                y: coco_futhark::storage::F64_2D<'c, $backend>,
+                w: coco_futhark::storage::F64_1D<'c, $backend>,
+                c: coco_futhark::storage::F64_2D<'c, $backend>,
+                R: coco_futhark::storage::F64_2D<'c, $backend>,
             },
         }
 
@@ -43,8 +43,11 @@ macro_rules! declare_params {
                 }
             }
 
-            pub fn from<'a>(ctx: &'c $backend::Context, params: &$crate::Params) -> Self {
-                use $backend::storage;
+            pub fn from<'a>(
+                ctx: &'c coco_futhark::Context<$backend>,
+                params: &$crate::Params,
+            ) -> Self {
+                use coco_futhark::storage;
                 use $crate::Params;
 
                 match params {
@@ -109,14 +112,14 @@ macro_rules! declare_params {
 
 #[macro_export]
 macro_rules! declare_eval {
-    ($backend:ident) => {
+    ($backend:path) => {
         fn eval(
-            ctx: &$backend::Context,
+            ctx: &coco_futhark::Context<$backend>,
             function: $crate::Function,
             params: &FParams,
             x: $crate::InputMatrix,
         ) -> Option<Vec<f64>> {
-            use $backend::{functions, storage};
+            use coco_futhark::{functions, storage};
             use $crate::Function;
 
             let mut output = Vec::with_capacity(x.inputs());
@@ -203,16 +206,16 @@ macro_rules! declare_eval {
 
 #[macro_export]
 macro_rules! declare_problem {
-    ($backend:ident) => {
+    ($backend:path) => {
         pub struct Problem<'c> {
-            context: &'c $backend::Context,
+            context: &'c coco_futhark::Context<$backend>,
             function: $crate::Function,
             params: FParams<'c>,
         }
 
         impl<'c> Problem<'c> {
             pub fn new(
-                context: &'c $backend::Context,
+                context: &'c coco_futhark::Context<$backend>,
                 function: $crate::Function,
                 params: FParams<'c>,
             ) -> Self {

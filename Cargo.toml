@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    #"evaluation",
+    "evaluation",
     "coco-legacy",
-    #"coco-accelerated",
+    "coco-accelerated",
     "coco-futhark",
 ]
