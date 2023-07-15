@@ -3,6 +3,5 @@ members = [
     #"evaluation",
     "coco-legacy",
     #"coco-accelerated",
-    "coco-futhark-compiler",
     "coco-futhark",
 ]
