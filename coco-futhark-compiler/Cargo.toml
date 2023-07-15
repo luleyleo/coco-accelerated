@@ -1,5 +1,5 @@
 [package]
-name = "futharkc"
+name = "coco-futhark-compiler"
 version = "0.1.0"
 edition = "2021"
 

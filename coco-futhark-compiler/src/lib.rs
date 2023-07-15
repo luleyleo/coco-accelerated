@@ -11,7 +11,7 @@ use std::{
 
 const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 const FUTHARK_SOURCE_FILE: &str = "batch.fut";
-const SOURCE_DIR: &str = "../shared/src/futhark";
+const SOURCE_DIR: &str = "./src/futhark";
 
 fn source_dir_path() -> PathBuf {
     PathBuf::from(SOURCE_DIR)
