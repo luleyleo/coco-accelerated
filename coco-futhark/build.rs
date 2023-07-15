@@ -31,7 +31,7 @@ fn main() -> Result<()> {
 
     #[cfg(feature = "cuda")]
     {
-        futharkc::build_target("cuda").wrap_err("Failed to build Cuda target.")?;
+        build_target("cuda").wrap_err("Failed to build Cuda target.")?;
 
         println!("cargo:rustc-link-search=/opt/cuda/lib64");
         println!("cargo:rustc-link-lib=cuda");
