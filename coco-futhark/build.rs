@@ -8,4 +8,10 @@ fn main() {
 
     #[cfg(feature = "multicore")]
     build_target("multicore").unwrap();
+
+    #[cfg(feature = "opencl")]
+    {
+        build_target("opencl").unwrap();
+        println!("cargo:rustc-link-lib=OpenCL");
+    }
 }

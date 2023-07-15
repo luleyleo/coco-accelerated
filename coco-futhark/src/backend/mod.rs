@@ -8,6 +8,11 @@ mod multicore;
 #[cfg(feature = "multicore")]
 pub use multicore::Multicore;
 
+#[cfg(feature = "opencl")]
+mod opencl;
+#[cfg(feature = "opencl")]
+pub use opencl::OpenCL;
+
 #[allow(non_camel_case_types)]
 pub mod types {
     #[repr(C)]
