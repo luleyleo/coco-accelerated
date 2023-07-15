@@ -14,4 +14,14 @@ fn main() {
         build_target("opencl").unwrap();
         println!("cargo:rustc-link-lib=OpenCL");
     }
+
+    #[cfg(feature = "cuda")]
+    {
+        futharkc::build_target("cuda").unwrap();
+
+        println!("cargo:rustc-link-search=/opt/cuda/lib64");
+        println!("cargo:rustc-link-lib=cuda");
+        println!("cargo:rustc-link-lib=cudart");
+        println!("cargo:rustc-link-lib=nvrtc");
+    }
 }

@@ -13,6 +13,11 @@ mod opencl;
 #[cfg(feature = "opencl")]
 pub use opencl::OpenCL;
 
+#[cfg(feature = "cuda")]
+mod cuda;
+#[cfg(feature = "cuda")]
+pub use cuda::Cuda;
+
 #[allow(non_camel_case_types)]
 pub mod types {
     #[repr(C)]
