@@ -1,5 +1,12 @@
+#[cfg(feature = "c")]
 mod c;
+#[cfg(feature = "c")]
 pub use c::C;
+
+#[cfg(feature = "multicore")]
+mod multicore;
+#[cfg(feature = "multicore")]
+pub use multicore::Multicore;
 
 #[allow(non_camel_case_types)]
 pub mod types {
