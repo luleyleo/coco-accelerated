@@ -1,15 +1,18 @@
-use crate::{sys, Context};
+use crate::{
+    backend::{types, Backend},
+    Context,
+};
 use std::slice;
 
-pub struct F64_1D<'c> {
-    context: &'c Context,
-    pub(crate) inner: *mut sys::futhark_f64_1d,
+pub struct F64_1D<'c, B: Backend> {
+    context: &'c Context<B>,
+    pub(crate) inner: *mut types::futhark_f64_1d,
 }
 
-impl<'c> F64_1D<'c> {
-    pub fn new(context: &'c Context, data: &[f64]) -> Self {
+impl<'c, B: Backend> F64_1D<'c, B> {
+    pub fn new(context: &'c Context<B>, data: &[f64]) -> Self {
         let inner = unsafe {
-            sys::futhark_new_f64_1d(context.inner, data.as_ptr(), data.len().try_into().unwrap())
+            B::futhark_new_f64_1d(context.inner, data.as_ptr(), data.len().try_into().unwrap())
         };
         assert!(!inner.is_null());
         F64_1D { context, inner }
@@ -19,14 +22,14 @@ impl<'c> F64_1D<'c> {
     ///
     /// # Safety
     /// `inner` must be a valid futhark array.
-    pub unsafe fn from_raw(context: &'c Context, inner: *mut sys::futhark_f64_1d) -> Self {
+    pub unsafe fn from_raw(context: &'c Context<B>, inner: *mut types::futhark_f64_1d) -> Self {
         assert!(!inner.is_null());
         F64_1D { context, inner }
     }
 
     pub fn shape(&self) -> &[usize] {
         unsafe {
-            let shape = sys::futhark_shape_f64_1d(self.context.inner, self.inner);
+            let shape = B::futhark_shape_f64_1d(self.context.inner, self.inner);
             slice::from_raw_parts(shape as *const usize, 1)
         }
     }
@@ -34,7 +37,7 @@ impl<'c> F64_1D<'c> {
     pub fn values(&self, out: &mut Vec<f64>) {
         out.reserve(self.shape()[0] - out.capacity());
         unsafe {
-            sys::futhark_values_f64_1d(self.context.inner, self.inner, out.as_mut_ptr());
+            B::futhark_values_f64_1d(self.context.inner, self.inner, out.as_mut_ptr());
             out.set_len(self.shape()[0]);
         }
 
@@ -42,10 +45,10 @@ impl<'c> F64_1D<'c> {
     }
 }
 
-impl Drop for F64_1D<'_> {
+impl<B: Backend> Drop for F64_1D<'_, B> {
     fn drop(&mut self) {
         unsafe {
-            sys::futhark_free_f64_1d(self.context.inner, self.inner);
+            B::futhark_free_f64_1d(self.context.inner, self.inner);
         }
     }
 }

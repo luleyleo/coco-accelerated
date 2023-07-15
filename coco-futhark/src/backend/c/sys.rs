@@ -9,4 +9,4 @@
     clippy::upper_case_acronyms
 )]
 
-include!(concat!(env!("OUT_DIR"), "/futhark/accelerated.rs"));
+include!(concat!(env!("OUT_DIR"), "/futhark/c/accelerated.rs"));

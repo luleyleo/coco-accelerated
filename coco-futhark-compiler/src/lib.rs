@@ -35,10 +35,10 @@ pub fn watch_source() -> Result<()> {
 pub fn build_target(compiler: &str) -> Result<()> {
     let out_dir = &env::var("OUT_DIR").wrap_err("OUT_DIR is undefined.")?;
 
-    let target_dir = &PathBuf::from(out_dir).join("futhark");
+    let target_dir = &PathBuf::from(out_dir).join("futhark").join(compiler);
     fs::create_dir_all(&target_dir).wrap_err("Could not create target dir.")?;
 
-    let raw_target_dir = &PathBuf::from(out_dir).join("futhark_raw");
+    let raw_target_dir = &PathBuf::from(out_dir).join("futhark_raw").join(compiler);
     fs::create_dir_all(&raw_target_dir).wrap_err("Could not create raw target dir.")?;
 
     let source = source_dir_path().join(FUTHARK_SOURCE_FILE);

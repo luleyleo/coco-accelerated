@@ -3,5 +3,12 @@ name = "coco-futhark"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+c = []
+multicore = []
+opencl = []
+cuda = []
+default = ["c"]
+
 [build-dependencies]
 coco-futhark-compiler = { path = "../coco-futhark-compiler" }

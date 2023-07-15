@@ -1,25 +1,26 @@
 use crate::{
+    backend::{types, Backend},
     storage::{F64_1D, F64_2D},
-    sys, Context,
+    Context,
 };
 
-pub type BbobFn = unsafe extern "C" fn(
-    ctx: *mut sys::futhark_context,
-    y: *mut *mut sys::futhark_f64_1d,
-    x: *const sys::futhark_f64_2d,
-    xopt: *const sys::futhark_f64_1d,
+pub type BbobFn = unsafe fn(
+    ctx: *mut types::futhark_context,
+    y: *mut *mut types::futhark_f64_1d,
+    x: *const types::futhark_f64_2d,
+    xopt: *const types::futhark_f64_1d,
     fopt: f64,
 ) -> ::std::os::raw::c_int;
 
-pub fn bbob(
-    ctx: &Context,
+pub fn bbob<B: Backend>(
+    ctx: &Context<B>,
     function: BbobFn,
     output: &mut Vec<f64>,
-    x: &F64_2D,
-    xopt: &F64_1D,
+    x: &F64_2D<B>,
+    xopt: &F64_1D<B>,
     fopt: f64,
 ) -> bool {
-    let mut out: *mut sys::futhark_f64_1d = std::ptr::null_mut();
+    let mut out: *mut types::futhark_f64_1d = std::ptr::null_mut();
 
     let status = unsafe { (function)(ctx.inner, &mut out, x.inner, xopt.inner, fopt) == 0 };
     let sync_status = ctx.sync();
@@ -35,25 +36,25 @@ pub fn bbob(
     }
 }
 
-pub type RotatedBbobFn = unsafe extern "C" fn(
-    ctx: *mut sys::futhark_context,
-    y: *mut *mut sys::futhark_f64_1d,
-    x: *const sys::futhark_f64_2d,
-    xopt: *const sys::futhark_f64_1d,
+pub type RotatedBbobFn = unsafe fn(
+    ctx: *mut types::futhark_context,
+    y: *mut *mut types::futhark_f64_1d,
+    x: *const types::futhark_f64_2d,
+    xopt: *const types::futhark_f64_1d,
     fopt: f64,
-    R: *const sys::futhark_f64_2d,
+    R: *const types::futhark_f64_2d,
 ) -> ::std::os::raw::c_int;
 
-pub fn rotated_bbob(
-    ctx: &Context,
+pub fn rotated_bbob<B: Backend>(
+    ctx: &Context<B>,
     function: RotatedBbobFn,
     output: &mut Vec<f64>,
-    x: &F64_2D,
-    xopt: &F64_1D,
+    x: &F64_2D<B>,
+    xopt: &F64_1D<B>,
     fopt: f64,
-    R: &F64_2D,
+    R: &F64_2D<B>,
 ) -> bool {
-    let mut out: *mut sys::futhark_f64_1d = std::ptr::null_mut();
+    let mut out: *mut types::futhark_f64_1d = std::ptr::null_mut();
 
     let status =
         unsafe { (function)(ctx.inner, &mut out, x.inner, xopt.inner, fopt, R.inner) == 0 };
@@ -70,27 +71,27 @@ pub fn rotated_bbob(
     }
 }
 
-pub type DoubleRotatedBbobFn = unsafe extern "C" fn(
-    ctx: *mut sys::futhark_context,
-    y: *mut *mut sys::futhark_f64_1d,
-    x: *const sys::futhark_f64_2d,
-    xopt: *const sys::futhark_f64_1d,
+pub type DoubleRotatedBbobFn = unsafe fn(
+    ctx: *mut types::futhark_context,
+    y: *mut *mut types::futhark_f64_1d,
+    x: *const types::futhark_f64_2d,
+    xopt: *const types::futhark_f64_1d,
     fopt: f64,
-    R: *const sys::futhark_f64_2d,
-    Q: *const sys::futhark_f64_2d,
+    R: *const types::futhark_f64_2d,
+    Q: *const types::futhark_f64_2d,
 ) -> ::std::os::raw::c_int;
 
-pub fn double_rotated_bbob(
-    ctx: &Context,
+pub fn double_rotated_bbob<B: Backend>(
+    ctx: &Context<B>,
     function: DoubleRotatedBbobFn,
     output: &mut Vec<f64>,
-    x: &F64_2D,
-    xopt: &F64_1D,
+    x: &F64_2D<B>,
+    xopt: &F64_1D<B>,
     fopt: f64,
-    R: &F64_2D,
-    Q: &F64_2D,
+    R: &F64_2D<B>,
+    Q: &F64_2D<B>,
 ) -> bool {
-    let mut out: *mut sys::futhark_f64_1d = std::ptr::null_mut();
+    let mut out: *mut types::futhark_f64_1d = std::ptr::null_mut();
 
     let status = unsafe {
         (function)(

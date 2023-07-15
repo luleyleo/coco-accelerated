@@ -1,27 +1,33 @@
-use crate::sys;
+use std::marker::PhantomData;
 
-pub struct Config {
-    pub(crate) inner: *mut sys::futhark_context_config,
+use crate::backend::{types, Backend};
+
+pub struct Config<B: Backend> {
+    _phantom: PhantomData<B>,
+    pub(crate) inner: *mut types::futhark_context_config,
 }
 
-impl Config {
+impl<B: Backend> Config<B> {
     pub fn new() -> Self {
-        let inner = unsafe { sys::futhark_context_config_new() };
+        let inner = unsafe { B::futhark_context_config_new() };
         assert!(!inner.is_null());
-        Config { inner }
+        Config {
+            _phantom: PhantomData,
+            inner,
+        }
     }
 }
 
-impl Default for Config {
+impl<B: Backend> Default for Config<B> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Drop for Config {
+impl<B: Backend> Drop for Config<B> {
     fn drop(&mut self) {
         unsafe {
-            sys::futhark_context_config_free(self.inner);
+            B::futhark_context_config_free(self.inner);
         }
     }
 }

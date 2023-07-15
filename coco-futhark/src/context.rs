@@ -1,40 +1,43 @@
-use crate::{sys, Config};
+use crate::{
+    backend::{types, Backend},
+    Config,
+};
 
-pub struct Context {
-    config: Config,
-    pub(crate) inner: *mut sys::futhark_context,
+pub struct Context<B: Backend> {
+    config: Config<B>,
+    pub(crate) inner: *mut types::futhark_context,
 }
 
 // TODO: figure out if this is okay
-unsafe impl Send for Context {}
-unsafe impl Sync for Context {}
+unsafe impl<B: Backend> Send for Context<B> {}
+unsafe impl<B: Backend> Sync for Context<B> {}
 
-impl Context {
-    pub fn new(config: Config) -> Self {
-        let inner = unsafe { sys::futhark_context_new(config.inner) };
+impl<B: Backend> Context<B> {
+    pub fn new(config: Config<B>) -> Self {
+        let inner = unsafe { B::futhark_context_new(config.inner) };
         assert!(!inner.is_null());
         Context { config, inner }
     }
 
-    pub fn config(&self) -> &Config {
+    pub fn config(&self) -> &Config<B> {
         &self.config
     }
 
     pub fn sync(&self) -> bool {
-        unsafe { sys::futhark_context_sync(self.inner) == 0 }
+        unsafe { B::futhark_context_sync(self.inner) == 0 }
     }
 }
 
-impl Default for Context {
+impl<B: Backend> Default for Context<B> {
     fn default() -> Self {
         Self::new(Config::default())
     }
 }
 
-impl Drop for Context {
+impl<B: Backend> Drop for Context<B> {
     fn drop(&mut self) {
         unsafe {
-            sys::futhark_context_free(self.inner);
+            B::futhark_context_free(self.inner);
         }
     }
 }
