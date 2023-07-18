@@ -1,3 +1,6 @@
+#[macro_use]
+mod implement;
+
 #[cfg(feature = "c")]
 mod c;
 #[cfg(feature = "c")]
