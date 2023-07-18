@@ -5,20 +5,16 @@ edition = "2021"
 
 [features]
 reference = ["coco"]
-c = ["coco-futhark-c"]
-multicore = ["coco-futhark-multicore"]
-opencl = ["coco-futhark-opencl"]
-cuda = ["coco-futhark-cuda"]
+c = ["coco-futhark/c"]
+multicore = ["coco-futhark/multicore"]
+opencl = ["coco-futhark/opencl"]
+cuda = ["coco-futhark/cuda"]
 default = ["reference", "c"]
 
 [dependencies]
 float_eq = "1.0.1"
-coco-legacy = { path = "../coco-legacy" }
-strum = { version = "0.24.1", features = ["derive"] }
-
-coco = { version = "0.5.0", package = "coco-rs", optional = true }
-coco-futhark-c = { path = "../coco-futhark/c", optional = true }
-coco-futhark-multicore = { path = "../coco-futhark/multicore", optional = true }
-coco-futhark-opencl = { path = "../coco-futhark/opencl", optional = true }
-coco-futhark-cuda = { path = "../coco-futhark/cuda", optional = true }
 ordered-float = "3.0.0"
+strum = { version = "0.24.1", features = ["derive"] }
+coco = { version = "0.5.0", package = "coco-rs", optional = true }
+coco-legacy = { path = "../coco-legacy" }
+coco-futhark = { path = "../coco-futhark", default-features = false }

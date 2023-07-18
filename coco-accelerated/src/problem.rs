@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use coco_futhark::backend;
+
 use crate::{eval, Context, Function, InputMatrix, Params};
 
 pub struct Problem<'c> {
@@ -8,16 +10,16 @@ pub struct Problem<'c> {
     pub instance: usize,
 
     #[cfg(feature = "c")]
-    pub(crate) instance_c: eval::futhark_c::Problem<'c>,
+    pub(crate) instance_c: eval::Problem<'c, backend::C>,
 
     #[cfg(feature = "multicore")]
-    pub(crate) instance_multicore: eval::futhark_multicore::Problem<'c>,
+    pub(crate) instance_multicore: eval::Problem<'c, backend::Multicore>,
 
     #[cfg(feature = "opencl")]
-    pub(crate) instance_opencl: eval::futhark_opencl::Problem<'c>,
+    pub(crate) instance_opencl: eval::Problem<'c, backend::OpenCL>,
 
     #[cfg(feature = "cuda")]
-    pub(crate) instance_cuda: eval::futhark_cuda::Problem<'c>,
+    pub(crate) instance_cuda: eval::Problem<'c, backend::Cuda>,
 
     phantom: PhantomData<&'c ()>,
 }
@@ -36,31 +38,31 @@ impl<'c> Problem<'c> {
         let params = Params::from(function, dimension, instance);
 
         #[cfg(feature = "c")]
-        let instance_c = eval::futhark_c::Problem::new(
+        let instance_c = eval::Problem::new(
             &context.coco_futhark_c,
             function,
-            eval::futhark_c::FParams::from(&context.coco_futhark_c, &params),
+            eval::FParams::from(&context.coco_futhark_c, &params),
         );
 
         #[cfg(feature = "multicore")]
-        let instance_multicore = eval::futhark_multicore::Problem::new(
+        let instance_multicore = eval::Problem::new(
             &context.coco_futhark_multicore,
             function,
-            eval::futhark_multicore::FParams::from(&context.coco_futhark_multicore, &params),
+            eval::FParams::from(&context.coco_futhark_multicore, &params),
         );
 
         #[cfg(feature = "opencl")]
-        let instance_opencl = eval::futhark_opencl::Problem::new(
+        let instance_opencl = eval::Problem::new(
             &context.coco_futhark_opencl,
             function,
-            eval::futhark_opencl::FParams::from(&context.coco_futhark_opencl, &params),
+            eval::FParams::from(&context.coco_futhark_opencl, &params),
         );
 
         #[cfg(feature = "cuda")]
-        let instance_cuda = eval::futhark_cuda::Problem::new(
+        let instance_cuda = eval::Problem::new(
             &context.coco_futhark_cuda,
             function,
-            eval::futhark_cuda::FParams::from(&context.coco_futhark_cuda, &params),
+            eval::FParams::from(&context.coco_futhark_cuda, &params),
         );
 
         Problem {

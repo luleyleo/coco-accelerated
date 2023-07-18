@@ -1,17 +1,20 @@
-use crate::{sys, Context};
+use crate::{
+    backend::{types, Backend},
+    Context,
+};
 use std::slice;
 
-pub struct F64_2D<'c> {
-    context: &'c Context,
-    pub(crate) inner: *mut sys::futhark_f64_2d,
+pub struct F64_2D<'c, B: Backend> {
+    context: &'c Context<B>,
+    pub(crate) inner: *mut types::futhark_f64_2d,
 }
 
-impl<'c> F64_2D<'c> {
-    pub fn new(context: &'c Context, data: &[f64], rows: usize, columns: usize) -> Self {
+impl<'c, B: Backend> F64_2D<'c, B> {
+    pub fn new(context: &'c Context<B>, data: &[f64], rows: usize, columns: usize) -> Self {
         assert_eq!(rows * columns, data.len());
 
         let inner = unsafe {
-            sys::futhark_new_f64_2d(
+            B::futhark_new_f64_2d(
                 context.inner,
                 data.as_ptr(),
                 rows.try_into().unwrap(),
@@ -25,7 +28,7 @@ impl<'c> F64_2D<'c> {
 
     pub fn shape(&self) -> &[usize] {
         unsafe {
-            let shape = sys::futhark_shape_f64_2d(self.context.inner, self.inner);
+            let shape = B::futhark_shape_f64_2d(self.context.inner, self.inner);
             slice::from_raw_parts(shape as *const usize, 2)
         }
     }
@@ -36,7 +39,7 @@ impl<'c> F64_2D<'c> {
 
         out.reserve(len - out.capacity());
         unsafe {
-            sys::futhark_values_f64_2d(self.context.inner, self.inner, out.as_mut_ptr());
+            B::futhark_values_f64_2d(self.context.inner, self.inner, out.as_mut_ptr());
             out.set_len(len);
         }
 
@@ -44,10 +47,10 @@ impl<'c> F64_2D<'c> {
     }
 }
 
-impl Drop for F64_2D<'_> {
+impl<B: Backend> Drop for F64_2D<'_, B> {
     fn drop(&mut self) {
         unsafe {
-            sys::futhark_free_f64_2d(self.context.inner, self.inner);
+            B::futhark_free_f64_2d(self.context.inner, self.inner);
         }
     }
 }

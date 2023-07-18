@@ -1,9 +1,16 @@
 [package]
-name = "futharkc"
+name = "coco-futhark"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
+[features]
+c = []
+multicore = []
+opencl = []
+cuda = []
+default = ["c"]
+
+[build-dependencies]
 bindgen = "0.65.1"
 cc = "1.0.79"
 eyre = "0.6.8"

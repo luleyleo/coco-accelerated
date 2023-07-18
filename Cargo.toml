@@ -3,10 +3,5 @@ members = [
     "evaluation",
     "coco-legacy",
     "coco-accelerated",
-    "coco-futhark/futharkc",
-    "coco-futhark/shared",
-    "coco-futhark/c",
-    "coco-futhark/multicore",
-    "coco-futhark/opencl",
-    "coco-futhark/cuda"
+    "coco-futhark",
 ]

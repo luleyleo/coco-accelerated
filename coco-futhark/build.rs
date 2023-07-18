@@ -11,17 +11,42 @@ use std::{
 
 const CARGO_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
 const FUTHARK_SOURCE_FILE: &str = "batch.fut";
-const SOURCE_DIR: &str = "../shared/src/futhark";
+const SOURCE_DIR: &str = "./src/futhark";
 
-fn source_dir_path() -> PathBuf {
-    PathBuf::from(SOURCE_DIR)
+fn main() -> Result<()> {
+    watch_source().wrap_err("Failed to watch source files for changes.")?;
+
+    #[cfg(feature = "c")]
+    build_target("c").wrap_err("Failed to build C target.")?;
+
+    #[cfg(feature = "multicore")]
+    build_target("multicore").wrap_err("Failed to build Multi-Core target.")?;
+
+    #[cfg(feature = "opencl")]
+    {
+        build_target("opencl").wrap_err("Failed to build OpenCL target.")?;
+
+        println!("cargo:rustc-link-lib=OpenCL");
+    }
+
+    #[cfg(feature = "cuda")]
+    {
+        build_target("cuda").wrap_err("Failed to build Cuda target.")?;
+
+        println!("cargo:rustc-link-search=/opt/cuda/lib64");
+        println!("cargo:rustc-link-lib=cuda");
+        println!("cargo:rustc-link-lib=cudart");
+        println!("cargo:rustc-link-lib=nvrtc");
+    }
+
+    Ok(())
 }
 
-pub fn watch_source() -> Result<()> {
+fn watch_source() -> Result<()> {
     let old_manifest_dir = env::var_os(CARGO_MANIFEST_DIR)
         .wrap_err("CARGO_MANIFEST_DIR environment variable is not defined.")?;
 
-    env::set_var(CARGO_MANIFEST_DIR, source_dir_path().as_os_str());
+    env::set_var(CARGO_MANIFEST_DIR, PathBuf::from(SOURCE_DIR).as_os_str());
 
     rerun_except(&[])
         .map_err(|err| eyre::eyre!("{}", err))
@@ -32,16 +57,16 @@ pub fn watch_source() -> Result<()> {
     Ok(())
 }
 
-pub fn build_target(compiler: &str) -> Result<()> {
+fn build_target(compiler: &str) -> Result<()> {
     let out_dir = &env::var("OUT_DIR").wrap_err("OUT_DIR is undefined.")?;
 
-    let target_dir = &PathBuf::from(out_dir).join("futhark");
+    let target_dir = &PathBuf::from(out_dir).join("futhark").join(compiler);
     fs::create_dir_all(&target_dir).wrap_err("Could not create target dir.")?;
 
-    let raw_target_dir = &PathBuf::from(out_dir).join("futhark_raw");
+    let raw_target_dir = &PathBuf::from(out_dir).join("futhark_raw").join(compiler);
     fs::create_dir_all(&raw_target_dir).wrap_err("Could not create raw target dir.")?;
 
-    let source = source_dir_path().join(FUTHARK_SOURCE_FILE);
+    let source = PathBuf::from(SOURCE_DIR).join(FUTHARK_SOURCE_FILE);
     ensure!(source.is_file(), "Futhark source file does not exist.");
 
     let futhark_status = Command::new("futhark")
