@@ -1,13 +1,9 @@
-#![allow(non_snake_case, clippy::too_many_arguments)]
+#![warn(missing_docs)]
 
-pub mod backend;
+//! Futhark sample library.
+//!
+//! You can run `cargo doc` to get its documentation
+//! like with any other Rust library.
+//!
 
-mod config;
-mod context;
-mod run;
-
-pub mod functions;
-pub mod storage;
-
-pub use config::Config;
-pub use context::Context;
+include!(concat!(env!("OUT_DIR"), "/futhark/futhark_lib.rs"));

@@ -1,17 +1,17 @@
-use coco_futhark::backend;
+use coco_futhark::backends;
 
 pub struct Context {
     #[cfg(feature = "c")]
-    pub coco_futhark_c: coco_futhark::Context<backend::C>,
+    pub coco_futhark_c: coco_futhark::Context<backends::C>,
 
     #[cfg(feature = "multicore")]
-    pub coco_futhark_multicore: coco_futhark::Context<backend::Multicore>,
+    pub coco_futhark_multicore: coco_futhark::Context<backends::Multicore>,
 
     #[cfg(feature = "opencl")]
-    pub coco_futhark_opencl: coco_futhark::Context<backend::OpenCL>,
+    pub coco_futhark_opencl: coco_futhark::Context<backends::OpenCL>,
 
     #[cfg(feature = "cuda")]
-    pub coco_futhark_cuda: coco_futhark::Context<backend::Cuda>,
+    pub coco_futhark_cuda: coco_futhark::Context<backends::Cuda>,
 }
 
 impl Context {

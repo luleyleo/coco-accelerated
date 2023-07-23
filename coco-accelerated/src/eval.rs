@@ -1,31 +1,31 @@
-use coco_futhark::backend::Backend;
+use coco_futhark::backends::Backend;
 
 pub enum FParams<'c, B: Backend> {
     Basic {
         fopt: f64,
-        xopt: coco_futhark::storage::F64_1D<'c, B>,
+        xopt: coco_futhark::Array_F64_1D<'c, B>,
     },
     Rotated {
         fopt: f64,
-        xopt: coco_futhark::storage::F64_1D<'c, B>,
-        R: coco_futhark::storage::F64_2D<'c, B>,
+        xopt: coco_futhark::Array_F64_1D<'c, B>,
+        R: coco_futhark::Array_F64_2D<'c, B>,
     },
     FixedRotated {
         fopt: f64,
-        R: coco_futhark::storage::F64_2D<'c, B>,
+        R: coco_futhark::Array_F64_2D<'c, B>,
     },
     DoubleRotated {
         fopt: f64,
-        xopt: coco_futhark::storage::F64_1D<'c, B>,
-        R: coco_futhark::storage::F64_2D<'c, B>,
-        Q: coco_futhark::storage::F64_2D<'c, B>,
+        xopt: coco_futhark::Array_F64_1D<'c, B>,
+        R: coco_futhark::Array_F64_2D<'c, B>,
+        Q: coco_futhark::Array_F64_2D<'c, B>,
     },
     Gallagher {
         fopt: f64,
-        y: coco_futhark::storage::F64_2D<'c, B>,
-        w: coco_futhark::storage::F64_1D<'c, B>,
-        c: coco_futhark::storage::F64_2D<'c, B>,
-        R: coco_futhark::storage::F64_2D<'c, B>,
+        y: coco_futhark::Array_F64_2D<'c, B>,
+        w: coco_futhark::Array_F64_1D<'c, B>,
+        c: coco_futhark::Array_F64_2D<'c, B>,
+        R: coco_futhark::Array_F64_2D<'c, B>,
     },
 }
 unsafe impl<B: Backend> Send for FParams<'static, B> {}
@@ -43,10 +43,11 @@ impl<'c, B: Backend> FParams<'c, B> {
 
     pub fn from<'a>(ctx: &'c coco_futhark::Context<B>, params: &crate::Params) -> Self {
         use crate::Params;
-        use coco_futhark::storage;
+        use coco_futhark::{Array_F64_1D, Array_F64_2D};
+
         match params {
             &Params::Basic { fopt, ref xopt } => {
-                let xopt = storage::F64_1D::new(ctx, &xopt);
+                let xopt = Array_F64_1D::new(ctx, &xopt, xopt.len());
                 FParams::Basic { fopt, xopt }
             }
             &Params::Rotated {
@@ -54,12 +55,12 @@ impl<'c, B: Backend> FParams<'c, B> {
                 ref xopt,
                 ref R,
             } => {
-                let xopt = storage::F64_1D::new(ctx, &xopt);
-                let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
+                let xopt = Array_F64_1D::new(ctx, &xopt, xopt.len());
+                let R = Array_F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
                 FParams::Rotated { fopt, xopt, R }
             }
             &Params::FixedRotated { fopt, ref R } => {
-                let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
+                let R = Array_F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
                 FParams::FixedRotated { fopt, R }
             }
             &Params::DoubleRotated {
@@ -68,9 +69,9 @@ impl<'c, B: Backend> FParams<'c, B> {
                 ref R,
                 ref Q,
             } => {
-                let xopt = storage::F64_1D::new(ctx, &xopt);
-                let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
-                let Q = storage::F64_2D::new(ctx, &Q.data, Q.dimension, Q.dimension);
+                let xopt = Array_F64_1D::new(ctx, &xopt, xopt.len());
+                let R = Array_F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
+                let Q = Array_F64_2D::new(ctx, &Q.data, Q.dimension, Q.dimension);
                 FParams::DoubleRotated { fopt, xopt, R, Q }
             }
             &Params::Gallagher {
@@ -90,10 +91,10 @@ impl<'c, B: Backend> FParams<'c, B> {
                     y.len(),
                     "y must have length of dim * peaks"
                 );
-                let y = storage::F64_2D::new(ctx, &y, R.dimension, peaks);
-                let w = storage::F64_1D::new(ctx, &w);
-                let c = storage::F64_2D::new(ctx, &c, peaks, R.dimension);
-                let R = storage::F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
+                let y = Array_F64_2D::new(ctx, &y, R.dimension, peaks);
+                let w = Array_F64_1D::new(ctx, &w, w.len());
+                let c = Array_F64_2D::new(ctx, &c, peaks, R.dimension);
+                let R = Array_F64_2D::new(ctx, &R.data, R.dimension, R.dimension);
                 FParams::Gallagher { fopt, y, w, c, R }
             }
         }
@@ -107,82 +108,107 @@ fn eval<B: Backend>(
     x: crate::InputMatrix,
 ) -> Option<Vec<f64>> {
     use crate::Function;
-    use coco_futhark::{functions, storage};
+
     let mut output = Vec::with_capacity(x.inputs());
-    let x = &storage::F64_2D::new(ctx, x.data(), x.inputs(), x.dimension());
-    let success = match (function, params) {
+    let x = &coco_futhark::Array_F64_2D::new(ctx, x.data(), x.inputs(), x.dimension());
+
+    match (function, params) {
         (Function::Sphere, FParams::Basic { fopt, xopt }) => {
-            functions::sphere_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_sphere(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::Ellipsoid, FParams::Basic { fopt, xopt }) => {
-            functions::ellipsoidal_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_ellipsoidal(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::Rastrigin, FParams::Basic { fopt, xopt }) => {
-            functions::rastrigin_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_rastrigin(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::BuecheRastrigin, FParams::Basic { fopt, xopt }) => {
-            functions::bueche_rastrigin_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_bueche_rastrigin(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::LinearSlope, FParams::Basic { fopt, xopt }) => {
-            functions::linear_slope_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_linear_slope(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::AttractiveSector, FParams::Rotated { fopt, xopt, R }) => {
-            functions::attractive_sector_bbob(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_attractive_sector(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::StepEllipsoid, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-            functions::step_ellipsoidal_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+            let result = ctx.entry_step_ellipsoidal(x, xopt, *fopt, R, Q).ok()?;
+            result.values(&mut output);
         }
         (Function::Rosenbrock, FParams::Basic { fopt, xopt }) => {
-            functions::rosenbrock_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_rosenbrock(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::RosenbrockRotated, FParams::FixedRotated { fopt, R }) => {
-            functions::rosenbrock_rotated_bbob(ctx, &mut output, x, *fopt, R)
+            let result = ctx.entry_rosenbrock_rotated(x, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::EllipsoidRotated, FParams::Rotated { fopt, xopt, R }) => {
-            functions::ellipsoidal_rotated_bbob(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_ellipsoidal_rotated(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::Discus, FParams::Rotated { fopt, xopt, R }) => {
-            functions::discus_bbob(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_discus(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::BentCigar, FParams::Rotated { fopt, xopt, R }) => {
-            functions::bent_cigar_bbob(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_bent_cigar(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::SharpRidge, FParams::Rotated { fopt, xopt, R }) => {
-            functions::sharp_ridge_bbob(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_sharp_ridge(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::DifferentPowers, FParams::Rotated { fopt, xopt, R }) => {
-            functions::different_powers_bbob(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_different_powers(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::RastriginRotated, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-            functions::rastrigin_rotated_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+            let result = ctx.entry_rastrigin_rotated(x, xopt, *fopt, R, Q).ok()?;
+            result.values(&mut output);
         }
         (Function::Weierstrass, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-            functions::weierstrass_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+            let result = ctx.entry_weierstrass(x, xopt, *fopt, R, Q).ok()?;
+            result.values(&mut output);
         }
         (Function::Schaffers1, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-            functions::schaffers_f7_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+            let result = ctx.entry_schaffers_f7(x, xopt, *fopt, R, Q).ok()?;
+            result.values(&mut output);
         }
         (Function::Schaffers2, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-            functions::schaffers_f7_ill_bbob(ctx, &mut output, x, xopt, *fopt, R, Q)
+            let result = ctx.entry_schaffers_f7_ill(x, xopt, *fopt, R, Q).ok()?;
+            result.values(&mut output);
         }
         (Function::GriewankRosenbrock, FParams::FixedRotated { fopt, R }) => {
-            functions::griewank_rosenbrock_bbob(ctx, &mut output, x, *fopt, R)
+            let result = ctx.entry_griewank_rosenbrock(x, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::Schwefel, FParams::Basic { fopt, xopt }) => {
-            functions::schwefel_bbob(ctx, &mut output, x, xopt, *fopt)
+            let result = ctx.entry_schwefel(x, xopt, *fopt).ok()?;
+            result.values(&mut output);
         }
         (Function::Gallagher1 | Function::Gallagher2, FParams::Gallagher { y, w, c, fopt, R }) => {
-            functions::gallagher(ctx, &mut output, x, y, w, c, *fopt, R)
+            let result = ctx.entry_gallagher(x, y, w, c, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         (Function::Katsuura, FParams::DoubleRotated { fopt, xopt, R, Q }) => {
-            functions::katsuura(ctx, &mut output, x, xopt, *fopt, R, Q)
+            let result = ctx.entry_katsuura(x, xopt, *fopt, R, Q).ok()?;
+            result.values(&mut output);
         }
         (Function::LunacekBiRastrigin, FParams::Rotated { fopt, xopt, R }) => {
-            functions::lunacek(ctx, &mut output, x, xopt, *fopt, R)
+            let result = ctx.entry_lunacek(x, xopt, *fopt, R).ok()?;
+            result.values(&mut output);
         }
         _ => panic!("illegal (Function, Params) combination"),
     };
-    success.then(|| output)
+
+    Some(output)
 }
 pub struct Problem<'c, B: Backend> {
     context: &'c coco_futhark::Context<B>,

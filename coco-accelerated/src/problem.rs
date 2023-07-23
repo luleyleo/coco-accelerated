@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use coco_futhark::backend;
+use coco_futhark::backends;
 
 use crate::{eval, Context, Function, InputMatrix, Params};
 
@@ -10,16 +10,16 @@ pub struct Problem<'c> {
     pub instance: usize,
 
     #[cfg(feature = "c")]
-    pub(crate) instance_c: eval::Problem<'c, backend::C>,
+    pub(crate) instance_c: eval::Problem<'c, backends::C>,
 
     #[cfg(feature = "multicore")]
-    pub(crate) instance_multicore: eval::Problem<'c, backend::Multicore>,
+    pub(crate) instance_multicore: eval::Problem<'c, backends::Multicore>,
 
     #[cfg(feature = "opencl")]
-    pub(crate) instance_opencl: eval::Problem<'c, backend::OpenCL>,
+    pub(crate) instance_opencl: eval::Problem<'c, backends::OpenCL>,
 
     #[cfg(feature = "cuda")]
-    pub(crate) instance_cuda: eval::Problem<'c, backend::Cuda>,
+    pub(crate) instance_cuda: eval::Problem<'c, backends::Cuda>,
 
     phantom: PhantomData<&'c ()>,
 }
