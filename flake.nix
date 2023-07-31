@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs = {
-      url = "github:NixOS/nixpkgs/22.11-beta";
+      url = "github:NixOS/nixpkgs/23.05";
     };
     nixpkgsOld.url =
       # Tensorflow is currently a little iffy. This is a working nixpkgs rev
