@@ -52,6 +52,7 @@
         packages = [
           pkgs.cargo
           pkgs.cargo-criterion
+          pkgs.rustfmt
           pkgs.clang
           pkgs.libclang
           pkgs.futhark

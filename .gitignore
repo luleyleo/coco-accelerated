@@ -1,6 +1,9 @@
 /target
-/Cargo.lock
 /reports
+/logs
+
+/flake.lock
+/Cargo.lock
 
 /plotting/.venv
 /plotting/plots
