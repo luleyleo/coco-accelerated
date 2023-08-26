@@ -100,8 +100,8 @@ pub fn evaluate_function<B: Backend>(
 ) -> Option<Vec<f64>> {
     use crate::Function;
 
-    let mut output = Vec::with_capacity(x.inputs());
-    let x = &coco_futhark::Array_F64_2D::new(ctx, x.data(), x.inputs(), x.dimension());
+    let mut output = Vec::with_capacity(x.len());
+    let x = &coco_futhark::Array_F64_2D::new(ctx, x.data(), x.len(), x.dimension());
 
     match (function, params) {
         (Function::Sphere, FutharkParams::Basic { fopt, xopt }) => {

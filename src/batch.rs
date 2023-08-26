@@ -20,12 +20,16 @@ impl<'a> InputBatch<'a> {
         self.data
     }
 
-    pub fn inputs(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.data.len() / self.dimension
     }
 
-    pub fn iter_inputs(&self) -> impl Iterator<Item = &[f64]> {
-        (0..self.inputs()).map(|i| &self.data[(i * self.dimension)..((i + 1) * self.dimension)])
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &[f64]> {
+        (0..self.len()).map(|i| &self.data[(i * self.dimension)..((i + 1) * self.dimension)])
     }
 }
 
@@ -34,11 +38,11 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn matrix_items() {
+    pub fn iter_items() {
         let data = &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
         let dimension = 3;
         let input = InputBatch::new(data, dimension);
-        let items = input.iter_inputs().collect::<Vec<&[f64]>>();
+        let items = input.iter().collect::<Vec<&[f64]>>();
 
         assert_eq!(
             items,
@@ -47,13 +51,14 @@ mod tests {
     }
 
     #[test]
-    pub fn empty_matrix() {
+    pub fn empty_batch() {
         let data = &[];
         let dimension = 3;
         let input = InputBatch::new(data, dimension);
 
-        assert_eq!(input.inputs(), 0);
+        assert!(input.is_empty());
+        assert_eq!(input.len(), 0);
         assert_eq!(input.dimension(), 3);
-        assert_eq!(input.iter_inputs().count(), 0);
+        assert_eq!(input.iter().count(), 0);
     }
 }
