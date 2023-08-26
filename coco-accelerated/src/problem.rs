@@ -41,28 +41,28 @@ impl<'c> Problem<'c> {
         let instance_c = eval::Problem::new(
             &context.coco_futhark_c,
             function,
-            eval::FParams::from(&context.coco_futhark_c, &params),
+            eval::FutharkParams::from(&context.coco_futhark_c, &params),
         );
 
         #[cfg(feature = "multicore")]
         let instance_multicore = eval::Problem::new(
             &context.coco_futhark_multicore,
             function,
-            eval::FParams::from(&context.coco_futhark_multicore, &params),
+            eval::FutharkParams::from(&context.coco_futhark_multicore, &params),
         );
 
         #[cfg(feature = "opencl")]
         let instance_opencl = eval::Problem::new(
             &context.coco_futhark_opencl,
             function,
-            eval::FParams::from(&context.coco_futhark_opencl, &params),
+            eval::FutharkParams::from(&context.coco_futhark_opencl, &params),
         );
 
         #[cfg(feature = "cuda")]
         let instance_cuda = eval::Problem::new(
             &context.coco_futhark_cuda,
             function,
-            eval::FParams::from(&context.coco_futhark_cuda, &params),
+            eval::FutharkParams::from(&context.coco_futhark_cuda, &params),
         );
 
         Problem {
