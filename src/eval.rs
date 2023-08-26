@@ -28,20 +28,11 @@ pub enum FutharkParams<'c, B: Backend> {
         R: coco_futhark::Array_F64_2D<'c, B>,
     },
 }
+
 unsafe impl<'c, B: Backend> Send for FutharkParams<'c, B> {}
 
 impl<'c, B: Backend> FutharkParams<'c, B> {
-    pub fn fopt(&self) -> f64 {
-        *match self {
-            FutharkParams::Basic { fopt, .. } => fopt,
-            FutharkParams::Rotated { fopt, .. } => fopt,
-            FutharkParams::FixedRotated { fopt, .. } => fopt,
-            FutharkParams::DoubleRotated { fopt, .. } => fopt,
-            FutharkParams::Gallagher { fopt, .. } => fopt,
-        }
-    }
-
-    pub fn from<'a>(ctx: &'c coco_futhark::Context<B>, params: &crate::Params) -> Self {
+    pub fn new<'a>(ctx: &'c coco_futhark::Context<B>, params: &crate::Params) -> Self {
         use crate::Params;
         use coco_futhark::{Array_F64_1D, Array_F64_2D};
 
@@ -101,11 +92,11 @@ impl<'c, B: Backend> FutharkParams<'c, B> {
     }
 }
 
-fn eval<B: Backend>(
+pub fn evaluate_function<B: Backend>(
     ctx: &coco_futhark::Context<B>,
     function: crate::Function,
     params: &FutharkParams<B>,
-    x: crate::InputMatrix,
+    x: crate::InputBatch,
 ) -> Option<Vec<f64>> {
     use crate::Function;
 
@@ -212,28 +203,4 @@ fn eval<B: Backend>(
     };
 
     Some(output)
-}
-pub struct Problem<'c, B: Backend> {
-    context: &'c coco_futhark::Context<B>,
-    function: crate::Function,
-    params: FutharkParams<'c, B>,
-}
-impl<'c, B: Backend> Problem<'c, B> {
-    pub fn new(
-        context: &'c coco_futhark::Context<B>,
-        function: crate::Function,
-        params: FutharkParams<'c, B>,
-    ) -> Self {
-        Problem {
-            context,
-            function,
-            params,
-        }
-    }
-    pub fn target_hit(&self, value: f64) -> bool {
-        value <= self.params.fopt() + 1e-8
-    }
-    pub fn evaluate(&self, x: crate::InputMatrix) -> Option<Vec<f64>> {
-        eval(self.context, self.function, &self.params, x)
-    }
 }

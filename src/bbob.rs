@@ -121,7 +121,7 @@ fn precompute_matrix_multiplication_with_conditioning(
 }
 
 impl Params {
-    pub fn from(function: Function, dimension: usize, instance: usize) -> Self {
+    pub fn new(function: Function, dimension: usize, instance: usize) -> Self {
         let rseed: usize = function as usize + 10000 * instance;
         let rseed_3: usize = 3 + 10000 * instance;
         let rseed_17: usize = 17 + 10000 * instance;

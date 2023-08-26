@@ -1,15 +1,15 @@
 #[derive(Debug, Clone, Copy)]
-pub struct InputMatrix<'a> {
+pub struct InputBatch<'a> {
     data: &'a [f64],
     dimension: usize,
 }
 
-impl<'a> InputMatrix<'a> {
+impl<'a> InputBatch<'a> {
     pub fn new(data: &'a [f64], dimension: usize) -> Self {
         assert!(dimension > 0);
         assert!(data.len() % dimension == 0);
 
-        InputMatrix { data, dimension }
+        InputBatch { data, dimension }
     }
 
     pub fn dimension(&self) -> usize {
@@ -37,7 +37,7 @@ mod tests {
     pub fn matrix_items() {
         let data = &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
         let dimension = 3;
-        let input = InputMatrix::new(data, dimension);
+        let input = InputBatch::new(data, dimension);
         let items = input.iter_inputs().collect::<Vec<&[f64]>>();
 
         assert_eq!(
@@ -50,7 +50,7 @@ mod tests {
     pub fn empty_matrix() {
         let data = &[];
         let dimension = 3;
-        let input = InputMatrix::new(data, dimension);
+        let input = InputBatch::new(data, dimension);
 
         assert_eq!(input.inputs(), 0);
         assert_eq!(input.dimension(), 3);

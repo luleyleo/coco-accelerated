@@ -1,160 +1,101 @@
-use std::marker::PhantomData;
+use coco_futhark::{backends::Backend, Context};
 
-use coco_futhark::backends;
+use crate::{
+    eval::{evaluate_function, FutharkParams},
+    Function, InputBatch, Params,
+};
 
-use crate::{eval, Context, Function, InputMatrix, Params};
-
-pub struct Problem<'c> {
-    pub function: Function,
-    pub dimension: usize,
-    pub instance: usize,
-
-    #[cfg(feature = "c")]
-    pub(crate) instance_c: eval::Problem<'c, backends::C>,
-
-    #[cfg(feature = "multicore")]
-    pub(crate) instance_multicore: eval::Problem<'c, backends::MultiCore>,
-
-    #[cfg(feature = "opencl")]
-    pub(crate) instance_opencl: eval::Problem<'c, backends::OpenCL>,
-
-    #[cfg(feature = "cuda")]
-    pub(crate) instance_cuda: eval::Problem<'c, backends::Cuda>,
-
-    phantom: PhantomData<&'c ()>,
+#[derive(Debug, Clone)]
+pub struct Problem {
+    function: Function,
+    dimension: usize,
+    instance: usize,
+    params: Params,
 }
 
-impl<'c> Problem<'c> {
-    pub fn new(context: &'c Context, function: Function, dimension: usize) -> Self {
-        Problem::new_instance(context, function, dimension, 1)
-    }
-
-    pub fn new_instance(
-        context: &'c Context,
-        function: Function,
-        dimension: usize,
-        instance: usize,
-    ) -> Self {
-        let params = Params::from(function, dimension, instance);
-
-        #[cfg(feature = "c")]
-        let instance_c = eval::Problem::new(
-            &context.coco_futhark_c,
-            function,
-            eval::FutharkParams::from(&context.coco_futhark_c, &params),
-        );
-
-        #[cfg(feature = "multicore")]
-        let instance_multicore = eval::Problem::new(
-            &context.coco_futhark_multicore,
-            function,
-            eval::FutharkParams::from(&context.coco_futhark_multicore, &params),
-        );
-
-        #[cfg(feature = "opencl")]
-        let instance_opencl = eval::Problem::new(
-            &context.coco_futhark_opencl,
-            function,
-            eval::FutharkParams::from(&context.coco_futhark_opencl, &params),
-        );
-
-        #[cfg(feature = "cuda")]
-        let instance_cuda = eval::Problem::new(
-            &context.coco_futhark_cuda,
-            function,
-            eval::FutharkParams::from(&context.coco_futhark_cuda, &params),
-        );
+impl Problem {
+    pub fn new(function: Function, dimension: usize, instance: usize) -> Self {
+        let params = Params::new(function, dimension, instance);
 
         Problem {
             function,
             dimension,
             instance,
-
-            #[cfg(feature = "c")]
-            instance_c,
-
-            #[cfg(feature = "multicore")]
-            instance_multicore,
-
-            #[cfg(feature = "opencl")]
-            instance_opencl,
-
-            #[cfg(feature = "cuda")]
-            instance_cuda,
-
-            phantom: PhantomData,
+            params,
         }
     }
 
-    #[cfg(feature = "reference")]
-    pub fn get_reference_instance<'s>(
+    pub fn function(&self) -> Function {
+        self.function
+    }
+
+    pub fn dimension(&self) -> usize {
+        self.dimension
+    }
+
+    pub fn instance(&self) -> usize {
+        self.instance
+    }
+
+    pub fn fopt(&self) -> f64 {
+        self.params.fopt()
+    }
+
+    pub fn evaluator<'c, B>(&self, context: &'c Context<B>) -> Evaluator<'c, B>
+    where
+        B: Backend,
+    {
+        let function = self.function;
+        let futhark_params = FutharkParams::new(context, &self.params);
+
+        Evaluator {
+            context,
+            function,
+            futhark_params,
+        }
+    }
+}
+
+impl PartialEq for Problem {
+    fn eq(&self, other: &Self) -> bool {
+        self.function == other.function
+            && self.dimension == other.dimension
+            && self.instance == other.instance
+    }
+}
+
+impl Eq for Problem {}
+
+pub struct Evaluator<'c, B: Backend> {
+    context: &'c Context<B>,
+    function: Function,
+    futhark_params: FutharkParams<'c, B>,
+}
+
+impl<'c, B: Backend> Evaluator<'c, B> {
+    pub fn evaluate(&self, x: InputBatch) -> Vec<f64> {
+        evaluate_function(self.context, self.function, &self.futhark_params, x).unwrap()
+    }
+
+    pub fn evalutate_iter<'a>(
         &self,
-        coco: &'s mut crate::reference::Suite,
-    ) -> crate::reference::Problem<'s> {
-        let inner = coco
-            .inner
-            .problem_by_function_dimension_instance(
-                self.function as usize,
-                self.dimension,
-                self.instance,
-            )
-            .unwrap();
+        x: impl ExactSizeIterator<Item = impl AsRef<&'a [f64]>>,
+    ) -> Vec<f64> {
+        let inputs = x.len();
 
-        crate::reference::Problem { inner }
-    }
+        if inputs == 0 {
+            return Vec::new();
+        }
 
-    #[allow(unused_variables, unreachable_code)]
-    #[cfg(any(feature = "c", feature = "multicore", feature = "cuda"))]
-    pub fn target_hit(&self, value: f64) -> bool {
-        #[cfg(feature = "c")]
-        return self.instance_c.target_hit(value);
+        let data = x
+            .map(|x| x.as_ref().iter().copied())
+            .flatten()
+            .collect::<Vec<f64>>();
 
-        #[cfg(feature = "multicore")]
-        return self.instance_multicore.target_hit(value);
+        let dimension = data.len() / inputs;
 
-        #[cfg(feature = "cuda")]
-        return self.instance_cuda.target_hit(value);
-    }
+        let input_batch = InputBatch::new(&data, dimension);
 
-    #[cfg(feature = "c")]
-    pub fn eval_futhark_c(&self, x: InputMatrix) -> Vec<f64> {
-        assert_eq!(self.dimension, x.dimension());
-
-        self.instance_c.evaluate(x).unwrap()
-    }
-
-    #[cfg(feature = "multicore")]
-    pub fn eval_futhark_multicore(&self, x: InputMatrix) -> Vec<f64> {
-        assert_eq!(self.dimension, x.dimension());
-
-        self.instance_multicore.evaluate(x).unwrap()
-    }
-
-    #[cfg(feature = "opencl")]
-    pub fn eval_futhark_opencl(&self, x: InputMatrix) -> Vec<f64> {
-        assert_eq!(self.dimension, x.dimension());
-
-        self.instance_opencl.evaluate(x).unwrap()
-    }
-
-    #[cfg(feature = "cuda")]
-    pub fn eval_futhark_cuda(&self, x: InputMatrix) -> Vec<f64> {
-        assert_eq!(self.dimension, x.dimension());
-
-        self.instance_cuda.evaluate(x).unwrap()
-    }
-
-    #[cfg(feature = "c")]
-    pub fn eval_futhark_c_single(&self, x: &[f64]) -> f64 {
-        let x = InputMatrix::new(x, x.len());
-
-        self.eval_futhark_c(x).pop().unwrap()
-    }
-
-    #[cfg(feature = "opencl")]
-    pub fn eval_futhark_opencl_single(&self, x: &[f64]) -> f64 {
-        let x = InputMatrix::new(x, x.len());
-
-        self.eval_futhark_opencl(x).pop().unwrap()
+        self.evaluate(input_batch)
     }
 }
