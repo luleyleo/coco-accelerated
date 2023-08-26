@@ -9,7 +9,7 @@ c = ["coco-futhark/c"]
 multicore = ["coco-futhark/multicore"]
 opencl = ["coco-futhark/opencl"]
 cuda = ["coco-futhark/cuda"]
-default = ["reference", "c"]
+default = ["c", "multicore"]
 
 [dependencies]
 float_eq = "1.0.1"

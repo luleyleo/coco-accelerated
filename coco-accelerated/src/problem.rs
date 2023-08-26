@@ -13,7 +13,7 @@ pub struct Problem<'c> {
     pub(crate) instance_c: eval::Problem<'c, backends::C>,
 
     #[cfg(feature = "multicore")]
-    pub(crate) instance_multicore: eval::Problem<'c, backends::Multicore>,
+    pub(crate) instance_multicore: eval::Problem<'c, backends::MultiCore>,
 
     #[cfg(feature = "opencl")]
     pub(crate) instance_opencl: eval::Problem<'c, backends::OpenCL>,
