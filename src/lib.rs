@@ -1,12 +1,9 @@
 #![allow(non_snake_case)]
 
+pub mod bbob;
+
 mod batch;
-mod bbob;
-mod eval;
-mod problem;
-
 pub use crate::batch::InputBatch;
-pub use crate::bbob::{Function, Params, DIMENSIONS};
-pub use crate::problem::Problem;
 
+/// Re-export.
 pub use strum::IntoEnumIterator;

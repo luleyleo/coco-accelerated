@@ -1,8 +1,8 @@
 use coco_futhark::{backends::Backend, Context};
 
 use crate::{
-    eval::{evaluate_function, FutharkParams},
-    Function, InputBatch, Params,
+    bbob::{evaluate_function, Function, FutharkParams, Params},
+    InputBatch,
 };
 
 #[derive(Debug, Clone)]

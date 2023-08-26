@@ -1,5 +1,10 @@
 use coco_futhark::backends::Backend;
 
+use crate::{
+    bbob::{Function, Params},
+    InputBatch,
+};
+
 pub enum FutharkParams<'c, B: Backend> {
     Basic {
         fopt: f64,
@@ -32,8 +37,7 @@ pub enum FutharkParams<'c, B: Backend> {
 unsafe impl<'c, B: Backend> Send for FutharkParams<'c, B> {}
 
 impl<'c, B: Backend> FutharkParams<'c, B> {
-    pub fn new<'a>(ctx: &'c coco_futhark::Context<B>, params: &crate::Params) -> Self {
-        use crate::Params;
+    pub fn new<'a>(ctx: &'c coco_futhark::Context<B>, params: &Params) -> Self {
         use coco_futhark::{Array_F64_1D, Array_F64_2D};
 
         match params {
@@ -94,12 +98,10 @@ impl<'c, B: Backend> FutharkParams<'c, B> {
 
 pub fn evaluate_function<B: Backend>(
     ctx: &coco_futhark::Context<B>,
-    function: crate::Function,
+    function: Function,
     params: &FutharkParams<B>,
-    x: crate::InputBatch,
+    x: InputBatch,
 ) -> Option<Vec<f64>> {
-    use crate::Function;
-
     let mut output = Vec::with_capacity(x.len());
     let x = &coco_futhark::Array_F64_2D::new(ctx, x.data(), x.len(), x.dimension());
 
