@@ -12,6 +12,3 @@ pub use crate::matrix::InputMatrix;
 pub use crate::problem::Problem;
 
 pub use strum::IntoEnumIterator;
-
-#[cfg(feature = "reference")]
-pub mod reference;
