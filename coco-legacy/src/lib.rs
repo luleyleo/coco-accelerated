@@ -7,7 +7,7 @@ use std::ops::{Index, IndexMut};
 
 type CocoMatrix = *const *mut f64;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Matrix {
     pub dimension: usize,
     pub data: Box<[f64]>,

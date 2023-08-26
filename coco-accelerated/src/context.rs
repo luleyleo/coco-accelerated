@@ -5,7 +5,7 @@ pub struct Context {
     pub coco_futhark_c: coco_futhark::Context<backends::C>,
 
     #[cfg(feature = "multicore")]
-    pub coco_futhark_multicore: coco_futhark::Context<backends::Multicore>,
+    pub coco_futhark_multicore: coco_futhark::Context<backends::MultiCore>,
 
     #[cfg(feature = "opencl")]
     pub coco_futhark_opencl: coco_futhark::Context<backends::OpenCL>,

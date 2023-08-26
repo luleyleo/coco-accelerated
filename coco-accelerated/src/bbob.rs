@@ -52,6 +52,7 @@ impl Function {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Params {
     Basic {
         fopt: f64,

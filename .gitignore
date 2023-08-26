@@ -1,6 +1,7 @@
 /target
 /reports
 /logs
+/.vscode
 
 /flake.lock
 /Cargo.lock
